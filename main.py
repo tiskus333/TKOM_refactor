@@ -1,6 +1,7 @@
-from lexer.lexer import Lexer
+from Lexer.lexer import Lexer
 
 if __name__ == "__main__":
-    lexer = Lexer(path_name="tests/test.txt")
+    lexer = Lexer("Tests/test.txt")
+    #lexer = Lexer("test tokenizacji stringa -2 2 _23;", direct_input=True)
     for i in range(200):
-        lexer.buildToken()
+        lexer.buildToken(verbose=True)
