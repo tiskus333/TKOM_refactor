@@ -1,4 +1,4 @@
-import io
+from unittest.case import skip
 from Lexer.filehandler import FileHandler
 from Lexer.token import Token
 import errors
@@ -23,13 +23,12 @@ class Lexer:
 
     def buildToken(self, verbose=False):
 
-        while self.getCurrChar() == ' ' or self.getCurrChar() == '\n':
+        while self.getCurrChar() == ' ' or self.getCurrChar() == '\n' or self.skipComment():
             self.getNextChar()
 
         position = self.getFilePosition()
 
         for try_to_build_token in [
-                self.buildComment,
                 self.buildNumber,
                 self.buildID,
                 self.buildDoubleCharTokens,
@@ -40,15 +39,16 @@ class Lexer:
                 if verbose:
                     print(token)
                 return token
-        print(f'unknown char {ord(self.getCurrChar())}')
-        raise errors.LexerError("Unkown Token", file_handler=self.filehandler)
+        if self.getCurrChar():
+            raise errors.LexerError(
+                f"Unkown Token {ord(self.getCurrChar())}", file_handler=self.filehandler)
 
-    def buildComment(self):
+    def skipComment(self):
         if self.getCurrChar() == '#':
             while self.getNextChar() != '\n':
                 pass
-            else:
-                self.getNextChar()
+            return True
+        return False
 
     def buildNumber(self):
         if not self.getCurrChar().isdecimal():
@@ -62,6 +62,9 @@ class Lexer:
         if self.getCurrChar() == '.':
             collected_chars.append('.')
             self.getNextChar()
+            if not self.getCurrChar().isdecimal():
+                raise errors.LexerError(
+                    "Invalid number format, missing digit after dot", file_handler=self.filehandler)
             while self.getCurrChar().isdecimal():
                 collected_chars.append(self.getCurrChar())
                 self.getNextChar()
