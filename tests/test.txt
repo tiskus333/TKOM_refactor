@@ -1,9 +1,9 @@
 class Klasa : DrugaKlasa
-{
+{ # test komentarza
     12t_2;
     int Token_3=2;
     float _tok2 = 2.3;
-    void func1
+    void func1(int i)
     {
         int a = 0;
         int b = 10;
@@ -21,3 +21,9 @@ class Klasa : DrugaKlasa
         }
     }
 };
+int main()
+{
+    Klasa k1;
+    k1.func1(10);
+    return 0;
+}
