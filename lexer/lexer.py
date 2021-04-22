@@ -1,14 +1,15 @@
-from lexer.token import Token
-from lexer.filehandler import FileHandler
-
+import io
+from Lexer.filehandler import FileHandler
+from Lexer.token import Token
+import errors
 
 reservedTokensDict = {'main': 0, 'class': 1, 'if': 2, 'else': 3, 'void': 4, 'float': 5, 'int': 6, 'while': 7, 'return': 8, '(': 9, ')': 10,
                       '{': 11, '}': 12, ':': 13, ';': 14, ',': 15, '.': 16,   '=': 17, '!': 18, '!=': 19, '==': 20, '<=': 21, '<': 22, '>': 23,  '>=': 24, '+': 25, '-': 26, '#ID': 27}
 
 
 class Lexer:
-    def __init__(self, path_name) -> None:
-        self.filehandler = FileHandler(path_name)
+    def __init__(self, path_name: str, direct_input=False) -> None:
+        self.filehandler = FileHandler(path_name, direct_input)
         self.getNextChar()
 
     def getNextChar(self):
@@ -20,22 +21,34 @@ class Lexer:
     def getFilePosition(self):
         return self.filehandler.line, self.filehandler.position
 
-    def buildToken(self):
+    def buildToken(self, verbose=False):
 
         while self.getCurrChar() == ' ' or self.getCurrChar() == '\n':
             self.getNextChar()
 
         position = self.getFilePosition()
 
-        for try_to_build_token in [self.buildNumber,
-                                   self.buildID,
-                                   self.buildDoubleCharTokens,
-                                   self.buildSingleCharToken]:
+        for try_to_build_token in [
+                self.buildComment,
+                self.buildNumber,
+                self.buildID,
+                self.buildDoubleCharTokens,
+                self.buildSingleCharToken]:
             if token := try_to_build_token():
                 token.position = position
                 self.current_token = token
-                print(token)
-                return
+                if verbose:
+                    print(token)
+                return token
+        print(f'unknown char {ord(self.getCurrChar())}')
+        raise errors.LexerError("Unkown Token", file_handler=self.filehandler)
+
+    def buildComment(self):
+        if self.getCurrChar() == '#':
+            while self.getNextChar() != '\n':
+                pass
+            else:
+                self.getNextChar()
 
     def buildNumber(self):
         if not self.getCurrChar().isdecimal():

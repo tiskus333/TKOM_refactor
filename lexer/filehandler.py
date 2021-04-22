@@ -1,9 +1,17 @@
+import io
+
+
 class FileHandler:
-    def __init__(self, file_name) -> None:
-        try:
-            self.file = open(file_name, "r")
-        except IOError:
-            print("FILE NOT ACCESSIBLE")
+    def __init__(self, file_name: str, direct_input: bool = False):
+        if not direct_input:
+            self.file_name = file_name
+            try:
+                self.file = io.open(file_name, "r")
+            except IOError:
+                print("FILE NOT ACCESSIBLE")
+        else:
+            self.file_name = "STRING INPUT"
+            self.file = io.StringIO(file_name)
         self.position = 0
         self.line = 1
 
