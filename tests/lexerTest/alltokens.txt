@@ -1,20 +1,18 @@
 # All tokens 
 # Keywords
- main  class  if   else   void   float   int   return  while
+main class if else void float int return while
 
 # single-character tokens
-(​   )   {​   }​   ;​   ​   .​ ​  !​   =​   +​   -­​  <​   >​
+( ) { } : ; . ! = + - < >
 
-// double-character tokens
-==​   !=​  <=​   >=​  
+# double-character tokens
+== != <= >=
 
 # int numbers
 0 1 10 12 1234567890 0002
 
 # float numbers
-
 0.12 1.234 5.6667 0.001
 
 # identificators
-
 _test1 test_2 $test3 _test_4_
