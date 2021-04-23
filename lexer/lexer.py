@@ -10,29 +10,29 @@ reservedTokensDict = {'main': 0, 'class': 1, 'if': 2, 'else': 3, 'void': 4, 'flo
 class Lexer:
     def __init__(self, path_name: str, direct_input=False) -> None:
         self.filehandler = FileHandler(path_name, direct_input)
-        self.getNextChar()
+        self.__getNextChar()
 
-    def getNextChar(self):
+    def __getNextChar(self):
         return self.filehandler.nextChar()
 
-    def getCurrChar(self):
+    def __getCurrChar(self):
         return self.filehandler.currChar()
 
-    def getFilePosition(self):
-        return self.filehandler.line, self.filehandler.position
+    def __getFilePosition(self):
+        return self.filehandler.getPosition()
 
-    def buildToken(self, verbose=False):
+    def buildToken(self, verbose=False) -> Token:
 
-        while self.getCurrChar().isspace() or self.skipComment():
-            self.getNextChar()
+        while self.__getCurrChar().isspace() or self.__skipComment():
+            self.__getNextChar()
 
-        position = self.getFilePosition()
+        position = self.__getFilePosition()
 
         for try_to_build_token in [
-                self.buildNumber,
-                self.buildID,
-                self.buildDoubleCharTokens,
-                self.buildSingleCharToken]:
+                self.__buildNumber,
+                self.__buildID,
+                self.__buildDoubleCharTokens,
+                self.__buildSingleCharToken]:
             if token := try_to_build_token():
                 token.position = position
                 self.current_token = token
@@ -41,41 +41,41 @@ class Lexer:
                 return token
 
         # If not EOF -> unknown token
-        if self.getCurrChar():
+        if self.__getCurrChar():
             raise errors.LexerError(
-                f"Unkown Token {ord(self.getCurrChar())}", file_handler=self.filehandler)
+                f"Unkown Token {ord(self.__getCurrChar())}", file_handler=self.filehandler)
 
     # Skip every character untill new line
-    def skipComment(self):
-        if self.getCurrChar() == '#':
-            while self.getNextChar() != '\n':
+    def __skipComment(self):
+        if self.__getCurrChar() == '#':
+            while self.__getNextChar() != '\n':
                 pass
             return True
         return False
 
     # Try tu build int or float number
-    def buildNumber(self):
-        if not self.getCurrChar().isdecimal():
+    def __buildNumber(self):
+        if not self.__getCurrChar().isdecimal():
             return None
 
-        collected_chars = [self.getCurrChar()]
-        self.getNextChar()
+        collected_chars = [self.__getCurrChar()]
+        self.__getNextChar()
 
         # Add digit characters
-        while self.getCurrChar().isdecimal():
-            collected_chars.append(self.getCurrChar())
-            self.getNextChar()
+        while self.__getCurrChar().isdecimal():
+            collected_chars.append(self.__getCurrChar())
+            self.__getNextChar()
 
         # Dot indicates float number
-        if self.getCurrChar() == '.':
+        if self.__getCurrChar() == '.':
             collected_chars.append('.')
-            self.getNextChar()
-            if not self.getCurrChar().isdecimal():
+            self.__getNextChar()
+            if not self.__getCurrChar().isdecimal():
                 raise errors.LexerError(
                     "Invalid number format, missing digit after dot", file_handler=self.filehandler)
-            while self.getCurrChar().isdecimal():
-                collected_chars.append(self.getCurrChar())
-                self.getNextChar()
+            while self.__getCurrChar().isdecimal():
+                collected_chars.append(self.__getCurrChar())
+                self.__getNextChar()
 
             result = ''.join(collected_chars)
             return Token(
@@ -92,16 +92,16 @@ class Lexer:
             )
 
     # Try to build identificator or keyword
-    def buildID(self):
-        currChar = self.getCurrChar()
+    def __buildID(self):
+        currChar = self.__getCurrChar()
         if not (currChar.isalpha() or currChar in ['_', '$']):
             return None
         collected_chars = [currChar]
 
-        self.getNextChar()
-        while self.getCurrChar().isalnum() or self.getCurrChar() in ['_', '$']:
-            collected_chars.append(self.getCurrChar())
-            self.getNextChar()
+        self.__getNextChar()
+        while self.__getCurrChar().isalnum() or self.__getCurrChar() in ['_', '$']:
+            collected_chars.append(self.__getCurrChar())
+            self.__getNextChar()
 
         result = ''.join(collected_chars)
 
@@ -115,12 +115,12 @@ class Lexer:
             position=(0, 0)
         )
 
-    def buildDoubleCharTokens(self):
-        char = self.getCurrChar()
+    def __buildDoubleCharTokens(self):
+        char = self.__getCurrChar()
         if char in ['>', '<', '=', '!']:
-            if (char2 := self.getNextChar()) == '=':
+            if (char2 := self.__getNextChar()) == '=':
                 result = ''.join([char, char2])
-                self.getNextChar()
+                self.__getNextChar()
                 return Token(
                     type=reservedTokensDict[result],
                     value=result,
@@ -135,10 +135,10 @@ class Lexer:
         else:
             return None
 
-    def buildSingleCharToken(self):
-        char = self.getCurrChar()
+    def __buildSingleCharToken(self):
+        char = self.__getCurrChar()
         if char in reservedTokensDict:
-            self.getNextChar()
+            self.__getNextChar()
             return Token(
                 type=reservedTokensDict[char],
                 value=char,
