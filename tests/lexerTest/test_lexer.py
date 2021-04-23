@@ -18,9 +18,12 @@ class TestLexer(unittest.TestCase):
             self.assertEqual(lexer.buildToken().value, expectedTokens[i])
 
     def test_UnknownToken(self):
-        lexer = Lexer("^ * % / ? [ ] @ ~ ` \" \ | &", direct_input=True)
-        for _ in range(14):
-            self.assertRaises(LexerError, lexer.buildToken())
+        unexpectedTokens = ['^', '*', '%', '/', '?',
+                            '[', ']', '@', '~', '\'', '\"', '\\', '|', '&']
+        for i in range(len(unexpectedTokens)):
+            with self.assertRaises(LexerError):
+                lexer = Lexer(unexpectedTokens[i], direct_input=True)
+                lexer.buildToken()
 
     def test_InvalidNumber(self):
         lexer = Lexer("12.a", direct_input=True)
@@ -56,6 +59,20 @@ class TestLexer(unittest.TestCase):
         expectedTokens = ["token1", "token2", "token3", "token4", "token5"]
         for i in range(len(expectedTokens)):
             self.assertEqual(lexer.buildToken().value, expectedTokens[i])
+
+    def test_PositionTab(self):
+        lexer = Lexer("t1\tt2", direct_input=True)
+        expecetedPositions = [(1, 1), (1, 4)]
+        for i in range(len(expecetedPositions)):
+            self.assertEqual(lexer.buildToken().position,
+                             expecetedPositions[i])
+
+    def test_PositionEndl(self):
+        lexer = Lexer("t1\nt2", direct_input=True)
+        expecetedPositions = [(1, 1), (2, 1)]
+        for i in range(len(expecetedPositions)):
+            self.assertEqual(lexer.buildToken().position,
+                             expecetedPositions[i])
 
 
 if __name__ == '__main__':
