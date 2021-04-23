@@ -81,6 +81,10 @@ class TestLexer(unittest.TestCase):
         self.assertEqual(lexer.buildToken().type,
                          lexer.reservedTokensDict['#EOF'])
 
+    def test_NoFile(self):
+        with self.assertRaises(IOError):
+            lexer = Lexer("Tests/lexerTest/no_such_file.txt")
 
-if __name__ == '__main__':
-    unittest.main()
+    def test_PrintToken(self):
+        lexer = Lexer("token", direct_input=True)
+        lexer.buildToken(verbose=True)

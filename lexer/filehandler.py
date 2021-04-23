@@ -9,7 +9,8 @@ class FileHandler:
             try:
                 self.__file = open(self.__file_name, "r")
             except IOError:
-                print("FILE NOT ACCESSIBLE")
+                raise IOError
+
         else:
             self.__file_name = "STRING INPUT"
             self.__file = io.StringIO(file_name)
