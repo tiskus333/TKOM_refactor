@@ -15,7 +15,9 @@ class TestLexer(unittest.TestCase):
         lexer = Lexer("__1__ $_$_2 $$3 __", direct_input=True)
         expectedTokens = ["__1__", "$_$_2", "$$3", "__"]
         for i in range(len(expectedTokens)):
-            self.assertEqual(lexer.buildToken().value, expectedTokens[i])
+            self.assertEqual((t := lexer.buildToken()).value,
+                             expectedTokens[i])
+            self.assertEqual(t.type, lexer.reservedTokensDict['#ID'])
 
     def test_UnknownToken(self):
         unexpectedTokens = ['^', '*', '%', '/', '?',
@@ -73,6 +75,11 @@ class TestLexer(unittest.TestCase):
         for i in range(len(expecetedPositions)):
             self.assertEqual(lexer.buildToken().position,
                              expecetedPositions[i])
+
+    def test_EmptyFile(self):
+        lexer = Lexer("Tests/lexerTest/empty.txt")
+        self.assertEqual(lexer.buildToken().type,
+                         lexer.reservedTokensDict['#EOF'])
 
 
 if __name__ == '__main__':
