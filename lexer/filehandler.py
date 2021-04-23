@@ -41,3 +41,7 @@ class FileHandler:
 
     def getFileName(self):
         return self.__file_name
+
+    def getStringLine(self, line: int):
+        if self.__direct_input:
+            return self.__file.getvalue().splitlines()[line-1]
