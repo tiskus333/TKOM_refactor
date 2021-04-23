@@ -11,10 +11,16 @@ class TestLexer(unittest.TestCase):
         for i in range(len(ExpectedTokenList)):
             self.assertEqual(lexer.buildToken().value, ExpectedTokenList[i])
 
+    def test_UnusualID(self):
+        lexer = Lexer("__1__ $_$_2 $$3 __", direct_input=True)
+        expectedTokens = ["__1__", "$_$_2", "$$3", "__"]
+        for i in range(len(expectedTokens)):
+            self.assertEqual(lexer.buildToken().value, expectedTokens[i])
+
     def test_UnknownToken(self):
-        lexer = Lexer("^ * % / ? [ ] @ ~ ` \" \ | & ", direct_input=True)
-        with self.assertRaises(LexerError):
-            lexer.buildToken()
+        lexer = Lexer("^ * % / ? [ ] @ ~ ` \" \ | &", direct_input=True)
+        for _ in range(14):
+            self.assertRaises(LexerError, lexer.buildToken())
 
     def test_InvalidNumber(self):
         lexer = Lexer("12.a", direct_input=True)
@@ -33,14 +39,21 @@ class TestLexer(unittest.TestCase):
             self.assertEqual(lexer.buildToken().value, expectedTokens[i])
 
     def test_TabInsteadSpace(self):
-        lexer = Lexer("cos\ta", direct_input=True)
-        expectedTokens = ["cos", "a"]
+        lexer = Lexer("cos\tam", direct_input=True)
+        expectedTokens = ["cos", "am"]
         for i in range(len(expectedTokens)):
             self.assertEqual(lexer.buildToken().value, expectedTokens[i])
 
     def test_Comment(self):
         lexer = Lexer("token#test komentarza", direct_input=True)
         expectedTokens = ["token"]
+        for i in range(len(expectedTokens)):
+            self.assertEqual(lexer.buildToken().value, expectedTokens[i])
+
+    def test_DifferentEndline(self):
+        lexer = Lexer(
+            "token1\ntoken2\rtoken3\n\rtoken4\r\ntoken5", direct_input=True)
+        expectedTokens = ["token1", "token2", "token3", "token4", "token5"]
         for i in range(len(expectedTokens)):
             self.assertEqual(lexer.buildToken().value, expectedTokens[i])
 

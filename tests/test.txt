@@ -1,6 +1,6 @@
 class Klasa : DrugaKlasa
 {
-#test3
+# test komentarza
     12t_2;
     int Token_3=2;
     float _tok2 = 2.3;
