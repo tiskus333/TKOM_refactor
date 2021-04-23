@@ -23,7 +23,7 @@ class Lexer:
 
     def buildToken(self, verbose=False):
 
-        while self.getCurrChar() == ' ' or self.getCurrChar() == '\n' or self.skipComment():
+        while self.getCurrChar().isspace() or self.skipComment():
             self.getNextChar()
 
         position = self.getFilePosition()

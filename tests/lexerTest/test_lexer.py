@@ -32,6 +32,18 @@ class TestLexer(unittest.TestCase):
         for i in range(len(expectedTokens)):
             self.assertEqual(lexer.buildToken().value, expectedTokens[i])
 
+    def test_TabInsteadSpace(self):
+        lexer = Lexer("cos\ta", direct_input=True)
+        expectedTokens = ["cos", "a"]
+        for i in range(len(expectedTokens)):
+            self.assertEqual(lexer.buildToken().value, expectedTokens[i])
+
+    def test_Comment(self):
+        lexer = Lexer("token#test komentarza", direct_input=True)
+        expectedTokens = ["token"]
+        for i in range(len(expectedTokens)):
+            self.assertEqual(lexer.buildToken().value, expectedTokens[i])
+
 
 if __name__ == '__main__':
     unittest.main()
