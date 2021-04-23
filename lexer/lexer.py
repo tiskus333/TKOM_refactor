@@ -39,10 +39,13 @@ class Lexer:
                 if verbose:
                     print(token)
                 return token
+
+        # If not EOF -> unknown token
         if self.getCurrChar():
             raise errors.LexerError(
                 f"Unkown Token {ord(self.getCurrChar())}", file_handler=self.filehandler)
 
+    # Skip every character untill new line
     def skipComment(self):
         if self.getCurrChar() == '#':
             while self.getNextChar() != '\n':
@@ -50,15 +53,20 @@ class Lexer:
             return True
         return False
 
+    # Try tu build int or float number
     def buildNumber(self):
         if not self.getCurrChar().isdecimal():
             return None
-        collected_chars = [self.getCurrChar()]
 
+        collected_chars = [self.getCurrChar()]
         self.getNextChar()
+
+        # Add digit characters
         while self.getCurrChar().isdecimal():
             collected_chars.append(self.getCurrChar())
             self.getNextChar()
+
+        # Dot indicates float number
         if self.getCurrChar() == '.':
             collected_chars.append('.')
             self.getNextChar()
@@ -83,19 +91,21 @@ class Lexer:
                 position=(0, 0)
             )
 
+    # Try to build identificator or keyword
     def buildID(self):
         currChar = self.getCurrChar()
-        if not (currChar.isalpha() or currChar == '_' or currChar == '$'):
+        if not (currChar.isalpha() or currChar in ['_', '$']):
             return None
         collected_chars = [currChar]
 
         self.getNextChar()
-        while self.getCurrChar().isalnum() or self.getCurrChar() == '_':
+        while self.getCurrChar().isalnum() or self.getCurrChar() in ['_', '$']:
             collected_chars.append(self.getCurrChar())
             self.getNextChar()
 
         result = ''.join(collected_chars)
 
+        # Check if found word is a keyword, otherwise it is a new idenetificator
         if not (token_type := reservedTokensDict.get(result)):
             token_type = reservedTokensDict["#ID"]
 
