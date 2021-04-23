@@ -4,7 +4,7 @@ from Lexer.token import Token
 import errors
 
 reservedTokensDict = {'main': 0, 'class': 1, 'if': 2, 'else': 3, 'void': 4, 'float': 5, 'int': 6, 'while': 7, 'return': 8, '(': 9, ')': 10,
-                      '{': 11, '}': 12, ':': 13, ';': 14, ',': 15, '.': 16,   '=': 17, '!': 18, '!=': 19, '==': 20, '<=': 21, '<': 22, '>': 23,  '>=': 24, '+': 25, '-': 26, '#ID': 27}
+                      '{': 11, '}': 12, ':': 13, ';': 14, ',': 15, '.': 16,   '=': 17, '!': 18, '!=': 19, '==': 20, '<=': 21, '<': 22, '>': 23,  '>=': 24, '+': 25, '-': 26, '#ID': 27, '#EOF': 28}
 
 
 class Lexer:
@@ -44,6 +44,8 @@ class Lexer:
         if self.__getCurrChar():
             raise errors.LexerError(
                 f"Unkown Token {ord(self.__getCurrChar())}", file_handler=self.filehandler)
+        else:
+            return Token(reservedTokensDict['#EOF'], '#EOF', position)
 
     # Skip every character untill new line
     def __skipComment(self):
