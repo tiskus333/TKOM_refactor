@@ -42,7 +42,7 @@ class Lexer:
         # If not EOF -> unknown token
         if self.__getCurrChar():
             raise errors.LexerError(
-                f"Unkown Token {ord(self.__getCurrChar())}", file_handler=self.filehandler)
+                f"Unkown Token {ord(self.__getCurrChar()),self.__getCurrChar()}", file_handler=self.filehandler)
         else:
             return Token(self.reservedTokensDict['#EOF'], '#EOF', position)
 

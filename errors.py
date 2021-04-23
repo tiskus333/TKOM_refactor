@@ -1,4 +1,4 @@
-from os import system
+import linecache
 
 
 class Error(Exception):
@@ -9,7 +9,10 @@ class Error(Exception):
 
 class LexerError(Error):
     def __init__(self, description, file_handler) -> None:
-        line, column = file_handler.getPosition()
-        self.message = 'LEXER ERROR ' + description + \
-            f' in file {file_handler.getFileName()}, at line {line}, column {column + 1}'
+        line_nr, column = file_handler.getPosition()
+        line = linecache.getline(file_handler.getFileName(), line_nr)
+        pointer = ''.join([' '*(column-1), '^'])
+        self.message = f'\nFile: "{file_handler.getFileName()}", line {line_nr}, column {column}\nWhat: '\
+            + description + f'\n{line}{pointer}'
         super().__init__(self.message)
+# dodać wyswietlenie linii

@@ -19,7 +19,10 @@ class FileHandler:
 
     def __del__(self):
         if not self.__direct_input:
-            self.__file.close()
+            try:
+                self.__file.close()
+            except:
+                pass
 
     def nextChar(self):
         self.__curr_char = self.__file.read(1)
