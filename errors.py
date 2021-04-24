@@ -1,4 +1,5 @@
 import linecache
+import re
 
 
 class Error(Exception):
@@ -15,7 +16,8 @@ class LexerError(Error):
             line = file_handler.getStringLine(line_nr) + '\n'
         else:
             line = linecache.getline(file_name, line_nr)
-        pointer = ''.join([' '*(column-1), '^'])
+        pointer = re.sub('\S', ' ', line)
+        pointer = pointer[:(column-1)] + '^' + pointer[column:]
         self.message = f'\nFile: "{file_name}", line {line_nr}, column {column}\nWhat: '\
             + description + f'\n{line}{pointer}'
         super().__init__(self.message)
