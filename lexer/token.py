@@ -1,5 +1,8 @@
+from typing import Optional
+
+
 class Token:
-    def __init__(self, type, value, position) -> None:
+    def __init__(self, type, value, position=(0, 0)) -> None:
         self.type = type
         self.value = value
         self.position = position

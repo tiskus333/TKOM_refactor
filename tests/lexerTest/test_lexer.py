@@ -6,8 +6,13 @@ from errors import LexerError
 class TestLexer(unittest.TestCase):
     def test_CheckKeywords(self):
         lexer = Lexer("Tests/lexerTest/alltokens.txt")
-        ExpectedTokenList = ["main", "class", "if", "else", "void", "float", "int", "return",  "while",
-                             '(', ')', '{', '}', ':', ';', '.', '!', '=', '+', '-', '<', '>', '==', '!=', '<=', '>=', 0, 1, 10, 12, 1234567890, 2, float(0.12), float(1.234), float(5.6667), float(0.001), "_test1", "test_2", "$test3", "_test_4_"]
+        ExpectedTokenList = ["# Keywords", "main", "class", "if", "else", "void", "float", "int", "return",  "while",
+                             "# single-character tokens", '(', ')', '{', '}', ':', ';', '.', '!', '=', '+', '-', '<', '>',
+                             "# double-character tokens", '==', '!=', '<=', '>=',
+                             "# int numbers", 0, 1, 10, 12, 1234567890, 2,
+                             "# float numbers", float(0.12), float(
+                                 1.234), float(5.6667), float(0.001),
+                             "# identificators", "_test1", "test_2", "$test3", "_test_4_"]
         for i in range(len(ExpectedTokenList)):
             self.assertEqual(lexer.buildToken().value, ExpectedTokenList[i])
 
@@ -51,7 +56,7 @@ class TestLexer(unittest.TestCase):
 
     def test_Comment(self):
         lexer = Lexer("token#test komentarza", direct_input=True)
-        expectedTokens = ["token"]
+        expectedTokens = ["token", "#test komentarza"]
         for i in range(len(expectedTokens)):
             self.assertEqual(lexer.buildToken().value, expectedTokens[i])
 
@@ -80,6 +85,12 @@ class TestLexer(unittest.TestCase):
         lexer = Lexer("Tests/lexerTest/empty.txt")
         self.assertEqual(lexer.buildToken().type,
                          lexer.reservedTokensDict['#EOF'])
+
+    def test_ErrorInFile(self):
+        lexer = Lexer("Tests/lexerTest/errorfile.txt")
+        with self.assertRaises(LexerError):
+            while lexer.buildToken().value != 'EOF':
+                pass
 
     def test_NoFile(self):
         with self.assertRaises(IOError):
