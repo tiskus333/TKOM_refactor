@@ -22,7 +22,7 @@ class Lexer:
 
     def buildToken(self, verbose=False) -> Token:
 
-        while self.__getCurrChar().isspace():  # or self.__skipComment():
+        while self.__getCurrChar().isspace():
             self.__getNextChar()
 
         position = self.__getFilePosition()
@@ -47,6 +47,7 @@ class Lexer:
         else:
             return Token(type=self.reservedTokensDict['#EOF'], value='#EOF', position=position)
 
+    # Try to build comment
     def __buildComment(self):
         if self.__getCurrChar() == '#':
             comment = ['#']
@@ -54,15 +55,6 @@ class Lexer:
                 comment.append(self.__getCurrChar())
             comment = ''.join(comment)
             return Token(type=self.reservedTokensDict['#COM'], value=comment)
-
-    # Skip every character untill new line
-
-    # def __skipComment(self):
-    #     if self.__getCurrChar() == '#':
-    #         while self.__getNextChar() != '\n':
-    #             pass
-    #         return True
-    #     return False
 
     # Try tu build int or float number
     def __buildNumber(self):
