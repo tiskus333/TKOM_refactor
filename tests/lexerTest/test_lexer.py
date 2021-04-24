@@ -7,7 +7,7 @@ class TestLexer(unittest.TestCase):
     def test_CheckKeywords(self):
         lexer = Lexer("Tests/lexerTest/alltokens.txt")
         ExpectedTokenList = ["# Keywords", "main", "class", "if", "else", "void", "float", "int", "return",  "while",
-                             "# single-character tokens", '(', ')', '{', '}', ':', ';', '.', '!', '=', '+', '-', '<', '>',
+                             "# single-character tokens", '(', ')', '{', '}', ':', ';', ',', '.', '!', '=', '+', '-', '<', '>',
                              "# double-character tokens", '==', '!=', '<=', '>=',
                              "# int numbers", 0, 1, 10, 12, 1234567890, 2,
                              "# float numbers", float(0.12), float(

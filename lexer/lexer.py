@@ -6,8 +6,8 @@ import errors
 
 class Lexer:
     def __init__(self, path_name: str, direct_input=False) -> None:
-        self.reservedTokensDict = {'main': 0, 'class': 1, 'if': 2, 'else': 3, 'void': 4, 'float': 5, 'int': 6, 'while': 7, 'return': 8, '(': 9, ')': 10,
-                                   '{': 11, '}': 12, ':': 13, ';': 14, ',': 15, '.': 16,   '=': 17, '!': 18, '!=': 19, '==': 20, '<=': 21, '<': 22, '>': 23,  '>=': 24, '+': 25, '-': 26, '#ID': 27, '#EOF': 28, '#COM': 29}
+        self.reservedTokensDict = {'main': 0, 'class': 1, 'if': 2, 'else': 3, 'void': 4, 'float': 5, 'int': 6, 'return': 7, 'while': 8,  '(': 9, ')': 10,
+                                   '{': 11, '}': 12, ':': 13, ';': 14, ',': 15, '.': 16,   '!': 17, '=': 18,  '+': 19, '-': 20, '<': 21, '>': 22, '==': 23, '!=': 24, '<=': 25, '>=': 26,  '#ID': 27,  "#INT_VAL": 28, "#FLOAT_VAL": 29, '#COM': 30, '#EOF': 31}
         self.filehandler = FileHandler(path_name, direct_input)
         self.__getNextChar()
 
@@ -82,13 +82,13 @@ class Lexer:
 
             result = ''.join(collected_chars)
             return Token(
-                type=self.reservedTokensDict["float"],
+                type=self.reservedTokensDict["#FLOAT_VAL"],
                 value=float(result)
             )
         else:
             result = ''.join(collected_chars)
             return Token(
-                type=self.reservedTokensDict["int"],
+                type=self.reservedTokensDict["#INT_VAL"],
                 value=int(result)
             )
 
@@ -107,7 +107,7 @@ class Lexer:
         result = ''.join(collected_chars)
 
         # Check if found word is a keyword, otherwise it is a new idenetificator
-        if not (token_type := self.reservedTokensDict.get(result)):
+        if (token_type := self.reservedTokensDict.get(result)) == None:
             token_type = self.reservedTokensDict["#ID"]
 
         return Token(
