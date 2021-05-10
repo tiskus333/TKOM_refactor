@@ -1,5 +1,6 @@
 import linecache
 import re
+from Lexer.token import Token
 
 
 class Error(Exception):
@@ -21,3 +22,10 @@ class LexerError(Error):
         self.message = f'\nFile: "{file_name}", line {line_nr}, column {column}\nWhat: '\
             + description + f'\n{line}{pointer}'
         super().__init__(self.message)
+
+
+class ParserError(Error):
+    def __init__(self, token) -> None:
+        message = "pass" + token
+        pass
+        super().__init__(message)
