@@ -1,87 +1,128 @@
+from Parser.tree import Node, printTree
+from typing import Optional
+from Lexer.token import Token
 from errors import ParserError
 from Lexer.lexer import Lexer
 
 
 class Parser:
-    def __init__(self, source) -> None:
-        self.lexer = Lexer(source)
-        self.source = source
-        self.obj_position = 0
+    def __init__(self, lexer: Lexer) -> None:
+        assert(lexer is not None)
+        self.__lexer = lexer
+        self.__curent_token: Optional[Token] = None
+        self.CST = []
+        self.__getNextToken()
+        self.__parseClassDefinition()
+
+    def __getNextToken(self) -> Token:
+        self.__curent_token = self.__lexer.buildToken()
+        return self.__curent_token
+
+    def __parseProgram(self):
         pass
 
-    def parseProgram(self):
-        objects = []
+    def __parseClassDefinition(self):
+        if self.__curent_token.type == 'class':
+            classNode = Node(self.__curent_token, [])
+            if self.__getNextToken().type == '#ID':
+                classNode.children.append(Node(self.__curent_token, []))
+            else:
+                raise ParserError('Expecting ID after class',
+                                  self.__curent_token)
+            if self.__getNextToken().type == ':':
+                classNode.children.append(Node(self.__curent_token, []))
+                if self.__getNextToken().type == '#ID':
+                    classNode.children.append(Node(self.__curent_token, []))
+                    self.__getNextToken()
+                else:
+                    raise ParserError(
+                        'Expecting ID after :', self.__curent_token)
 
-        return objects
+            if self.__curent_token.type != '{':
+                raise ParserError(
+                    'Excpecting "{" after class', self.__curent_token)
+            else:
+                classNode.children.append(Node(self.__curent_token, []))
+                while self.__getNextToken() != '}':
+                    if innerNode := self.__parseDefineStatement():
+                        classNode.children.append(innerNode)
+                    elif innerNode := self.__parseFunctionDefinition():
+                        classNode.children.append(innerNode)
+                classNode.children.append(Node(self.__curent_token, []))
 
-    def parseClassDefinition(self):
+            self.CST.append(classNode)
+
+    def __parseFunctionDefinition(self):
         pass
 
-    def parseFunctionDefinition(self):
+    def __parseParameters(self):
         pass
 
-    def parseParameters(def):
+    def __parseArguments(self):
         pass
 
-    def parseArguments(self):
+    def __parseStatementBlock(self):
         pass
 
-    def parseStatementBlock(self):
+    def __parseIfStatement(self):
         pass
 
-    def parseIfStatement(self):
+    def __parseWhileStatement(self):
         pass
 
-    def parseWhileStatement(self):
+    def __parseReturnStatement(self):
         pass
 
-    def parseReturnStatement(self):
+    def __parseDefineStatement(self):
         pass
 
-    def parseDefineStatement(self):
+    def __parseAssignStatement(self):
         pass
 
-    def parseAssignStatement(self):
+    def __parseExpression(self):
         pass
 
-    def parseExpression(self):
+    def __parseBaseExpression(self):
         pass
 
-    def parseBaseExpression(self):
+    def __parseParenthesesExpr(self):
         pass
 
-    def parseParenthesesExpr(self):
+    def __parseCondition(self):
         pass
 
-    def parseCondition(self):
+    def __parseRelationCondition(self):
         pass
 
-    def parseRelationCondition(self):
+    def __parseBaseCondition(self):
         pass
 
-    def parseBaseCondition(self):
+    def __parseParenthesesCondition(self):
         pass
 
-    def parseParenthesesCondition(self):
-        pass
+    def __parseType(self):
+        if self.__curent_token.type in ['int', 'float', '#ID']:
+            return Node(self.__curent_token, [])
 
-    def parseArithmeticNegationOp(self):
-        pass
+    def __parseArithmeticNegationOp(self):
+        if self.__curent_token.type == '-':
+            return Node(self.__curent_token, [])
 
-    def parseLogicNegationOp(self):
-        pass
+    def __parseLogicNegationOp(self):
+        if self.__curent_token.type == '!':
+            return Node(self.__curent_token, [])
 
-    def parseAssignmentOP(self):
-        pass
+    def __parseAssignmentOP(self):
+        if self.__curent_token.type == '=':
+            return Node(self.__curent_token, [])
 
-    def parseEqualOp(self):
-        pass
+    def __parseRelationOp(self):
+        if self.__curent_token.type in ['<', '>', '<=', '=>', '!=', '==']:
+            return Node(self.__curent_token, [])
 
-    def parseRelationOp(self):
-        pass
+    def __parseAdditiveOp(self):
+        if self.__curent_token.type in ['-', '+']:
+            return Node(self.__curent_token, [])
 
-    def parseAdditiveOp(self):
-        pass
-
-    def parseFuncCall(self):
+    def __parseFuncCall(self):
         pass

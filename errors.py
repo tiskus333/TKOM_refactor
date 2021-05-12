@@ -25,7 +25,6 @@ class LexerError(Error):
 
 
 class ParserError(Error):
-    def __init__(self, token) -> None:
-        message = "pass" + token
-        pass
+    def __init__(self, message, curr_token) -> None:
+        message += f'\nInstead got {curr_token}'
         super().__init__(message)
