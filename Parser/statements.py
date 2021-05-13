@@ -2,14 +2,13 @@ from Parser.tree import *
 
 
 class ClassDefine(ASTNode):
-    def __init__(self, class_name: str, base_class: str, variables: List, functions: List) -> None:
+    def __init__(self, class_name: str, base_class: str, members: List) -> None:
         self.class_name = class_name
         self.base_class = base_class
-        self.variables = variables
-        self.functions = functions
+        self.members = members
 
     def __str__(self) -> str:
-        return f"\nClass definition: Name={self.class_name}, Base class={self.base_class}, \nMember variables={self.variables}, \nMember functions={self.functions}"
+        return f"\nClass definition: Name={self.class_name}, BaseClass={self.base_class}, \nMembers={self.members}"
 
 
 class FunctionDefine(ASTNode):
@@ -42,34 +41,28 @@ class ParameterDefine(ASTNode):
 
 
 class IfStatement(ASTNode):
-    def __init__(self, condition, IfBlock, elseBlock=None) -> None:
+    def __init__(self, condition, ifBlock, elseBlock=None) -> None:
         self.condition = condition
-        self.IfBlock = IfBlock
+        self.ifBlock = ifBlock
         self.elseBlock = elseBlock
 
     def __str__(self) -> str:
-        return f"\nIF statement: Condition={self.condition}, IfBlock={self.IfBlock}, ElseBlock={self.elseBlock}"
+        return f"\nIF statement: Condition={self.condition}, ifBlock={self.ifBlock}, ElseBlock={self.elseBlock}"
 
 
 class WhileStatement(ASTNode):
-    def __init__(self) -> None:
-        self.condition
+    def __init__(self, condition, statementBlock) -> None:
+        self.condition = condition
+        self.statementBlock = statementBlock
 
     def __str__(self) -> str:
-        return f"\n"
+        return f"\nWhile statement: Condition={self.condition}, StatementBlock={self.statementBlock}"
 
 
 class ReturnStatement(ASTNode):
-    def __init__(self) -> None:
-        pass
+    def __init__(self, returnValue, returnType) -> None:
+        self.returnValue = returnValue
+        self.returnType = returnType
 
     def __str__(self) -> str:
         return f"\n"
-
-
-class IfStatement(ASTNode):
-    def __init__(self) -> None:
-        pass
-
-    def __str__(self) -> str:
-        return f""
