@@ -12,7 +12,7 @@ class Parser:
         self.__lexer = lexer
         self.__curent_token: Optional[Token] = None
         self.AST = []
-        self.__getNextToken()
+
         self.__parseProgram()
 
     def __getNextToken(self) -> Token:
@@ -20,13 +20,17 @@ class Parser:
         return self.__curent_token
 
     def __parseProgram(self):
-        self.__parseClassDefinition()
+        self.__getNextToken()
+        while self.__curent_token.type != '#EOF':
+            if result := self.__parseClassDefinition():
+                self.AST.append(result)
+            if result := self.__parseDefinition():
+                self.AST.append(result)
 
     def __parseClassDefinition(self):
         if self.__curent_token.type == 'class':
             class_name = base_class = None
-            variables = []
-            functions = []
+            members = []
             if self.__getNextToken().type == '#ID':
                 class_name = self.__curent_token.value
             else:
@@ -47,17 +51,14 @@ class Parser:
                 self.__getNextToken()
                 while self.__curent_token.type not in ['}', '#EOF']:
                     if result := self.__parseDefinition():
-                        if isinstance(result, FunctionDefine):
-                            functions.append(result)
-                        else:
-                            variables.append(result)
+                        members.append(result)
                 self.__getNextToken()
-            self.AST.append(ClassDefine(
-                class_name, base_class, variables, functions))
+            return ClassDefine(
+                class_name, base_class, members)
 
     def __parseDefinition(self):
         if type := self.__parseType():
-            if self.__getNextToken().type == '#ID':
+            if self.__getNextToken().type in ['#ID', 'main']:
                 name = self.__curent_token.value
             else:
                 raise ParserError('Excpecting ID after type',
@@ -67,6 +68,9 @@ class Parser:
                 functionBlock = self.__parseStatementBlock()
                 return FunctionDefine(type, name, parameters, functionBlock)
             elif self.__curent_token.type == ';':
+                if name == 'main':
+                    raise ParserError(
+                        'Variable cannot be named with reserved keyword', self.__curent_token)
                 if type == 'void':
                     raise ParserError(
                         'Variable cannot be of type void', self.__curent_token)
@@ -106,15 +110,34 @@ class Parser:
         return []
 
     def __parseIfStatement(self):
-        pass
+        if self.__curent_token.type == 'if':
+            if self.__getNextToken().type == '(':
+                condition = self.__parseCondition()
+                if self.__curent_token.type != ')':
+                    raise ParserError(
+                        "Expecting ) after condition", self.__curent_token)
+                ifBlock = self.__parseStatementBlock()
+                elseBlock = None
+                if self.__curent_token.type == 'else':
+                    elseBlock = self.__parseStatementBlock()
+                return IfStatement(condition, ifBlock, elseBlock)
+            else:
+                raise ParserError(
+                    "Expecting ( after if token", self.__curent_token)
 
     def __parseWhileStatement(self):
-        pass
+        if self.__curent_token.type == 'while':
+            if self.__getNextToken().type == '(':
+                condition = self.__parseCondition()
+            else:
+                raise ParserError(
+                    'Expecting ( after while token', self.__curent_token)
 
     def __parseReturnStatement(self):
         if self.__curent_token.type == 'return':
-            if return_value := self.__parseExpression():
-                return ReturnStatement(return_value)
+            return_value, return_type = self.__parseExpression()
+            if not return_value is None:
+                return ReturnStatement(return_value, return_type)
             else:
                 raise ParserError(
                     'Expecting return value after return keyword', self.__curent_token)
