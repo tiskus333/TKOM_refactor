@@ -8,6 +8,7 @@ if __name__ == "__main__":
     # while lexer.buildToken(verbose=True).value != '#EOF':
     #     pass
     if __name__ == '__main__':
-        lexer = Lexer('class kot: pies { }', direct_input=True)
+        lexer = Lexer(
+            'class kot: pies { int fun(int c, float d){} float x; void fun2(){} }', direct_input=True)
         parser = Parser(lexer=lexer)
-        printTree(parser.CST[0])
+        print(parser.AST[0])

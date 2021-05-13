@@ -2,16 +2,18 @@ from typing import List
 from Lexer.token import Token
 
 
-class Node:
-    def __init__(self, value: Token, children: List[Token] = []) -> None:
-        self.value: Token = value
-        self.children: List[Token] = children
+class ASTNode:
+    def __init__(self) -> None:
+        pass
 
-    def __str__(self):
-        return str(self.value)
+    def __str__(self) -> str:
+        pass
+
+    def __repr__(self) -> str:
+        return self.__str__()
 
 
-def printTree(node: Node, depth=0):
+def printTree(node: ASTNode, depth=0):
     if node != None:
         print(' '*depth, node)
         for n in node.children:

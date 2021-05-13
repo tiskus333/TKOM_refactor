@@ -1,8 +1,9 @@
-from Parser.tree import Node, printTree
+from Parser.tree import *
 from typing import Optional
 from Lexer.token import Token
 from errors import ParserError
 from Lexer.lexer import Lexer
+from Parser.statements import *
 
 
 class Parser:
@@ -10,29 +11,30 @@ class Parser:
         assert(lexer is not None)
         self.__lexer = lexer
         self.__curent_token: Optional[Token] = None
-        self.CST = []
+        self.AST = []
         self.__getNextToken()
-        self.__parseClassDefinition()
+        self.__parseProgram()
 
     def __getNextToken(self) -> Token:
         self.__curent_token = self.__lexer.buildToken()
         return self.__curent_token
 
     def __parseProgram(self):
-        pass
+        self.__parseClassDefinition()
 
     def __parseClassDefinition(self):
         if self.__curent_token.type == 'class':
-            classNode = Node(self.__curent_token, [])
+            class_name = base_class = None
+            variables = []
+            functions = []
             if self.__getNextToken().type == '#ID':
-                classNode.children.append(Node(self.__curent_token, []))
+                class_name = self.__curent_token.value
             else:
                 raise ParserError('Expecting ID after class',
                                   self.__curent_token)
             if self.__getNextToken().type == ':':
-                classNode.children.append(Node(self.__curent_token, []))
                 if self.__getNextToken().type == '#ID':
-                    classNode.children.append(Node(self.__curent_token, []))
+                    base_class = self.__curent_token.value
                     self.__getNextToken()
                 else:
                     raise ParserError(
@@ -40,29 +42,68 @@ class Parser:
 
             if self.__curent_token.type != '{':
                 raise ParserError(
-                    'Excpecting "{" after class', self.__curent_token)
+                    'Excpecting "{" after class name', self.__curent_token)
             else:
-                classNode.children.append(Node(self.__curent_token, []))
-                while self.__getNextToken() != '}':
-                    if innerNode := self.__parseDefineStatement():
-                        classNode.children.append(innerNode)
-                    elif innerNode := self.__parseFunctionDefinition():
-                        classNode.children.append(innerNode)
-                classNode.children.append(Node(self.__curent_token, []))
+                self.__getNextToken()
+                while self.__curent_token.type not in ['}', '#EOF']:
+                    if result := self.__parseDefinition():
+                        if isinstance(result, FunctionDefine):
+                            functions.append(result)
+                        else:
+                            variables.append(result)
+                self.__getNextToken()
+            self.AST.append(ClassDefine(
+                class_name, base_class, variables, functions))
 
-            self.CST.append(classNode)
-
-    def __parseFunctionDefinition(self):
-        pass
+    def __parseDefinition(self):
+        if type := self.__parseType():
+            if self.__getNextToken().type == '#ID':
+                name = self.__curent_token.value
+            else:
+                raise ParserError('Excpecting ID after type',
+                                  self.__curent_token)
+            if self.__getNextToken().type == '(':
+                parameters = self.__parseParameters()
+                functionBlock = self.__parseStatementBlock()
+                return FunctionDefine(type, name, parameters, functionBlock)
+            elif self.__curent_token.type == ';':
+                if type == 'void':
+                    raise ParserError(
+                        'Variable cannot be of type void', self.__curent_token)
+                self.__getNextToken()
+                return VariableDefine(type, name)
+            else:
+                raise ParserError(
+                    'Excpecting ; after variable definiton', self.__curent_token)
 
     def __parseParameters(self):
-        pass
+        if self.__curent_token.type == '(':
+            parameters = []
+            while self.__getNextToken().type != ')':
+                if len(parameters) > 0 and self.__curent_token.type == ',':
+                    self.__getNextToken()
+                if type := self.__parseType():
+                    if self.__getNextToken().type == '#ID':
+                        name = self.__curent_token.value
+                        parameters.append(ParameterDefine(type, name))
+                    else:
+                        raise ParserError(
+                            'Expecting ID after type', self.__curent_token)
+                else:
+                    raise ParserError(
+                        'Expecting variable type', self.__curent_token)
+            self.__getNextToken()
+        return parameters
 
     def __parseArguments(self):
         pass
 
     def __parseStatementBlock(self):
-        pass
+        if self.__curent_token.type == '{':
+            while self.__getNextToken().type != '}':
+                pass
+            self.__getNextToken()
+        return []
 
     def __parseIfStatement(self):
         pass
@@ -71,6 +112,12 @@ class Parser:
         pass
 
     def __parseReturnStatement(self):
+        if self.__curent_token.type == 'return':
+            if return_value := self.__parseExpression():
+                return ReturnStatement(return_value)
+            else:
+                raise ParserError(
+                    'Expecting return value after return keyword', self.__curent_token)
         pass
 
     def __parseDefineStatement(self):
@@ -101,8 +148,10 @@ class Parser:
         pass
 
     def __parseType(self):
-        if self.__curent_token.type in ['int', 'float', '#ID']:
-            return Node(self.__curent_token, [])
+        if self.__curent_token.type in ['int', 'float', 'void', '#ID']:
+            return self.__curent_token.value
+        else:
+            return None
 
     def __parseArithmeticNegationOp(self):
         if self.__curent_token.type == '-':

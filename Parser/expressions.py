@@ -1,24 +1,54 @@
 from Parser.tree import *
 
 
-class BaseExpression(Node):
-    def __init__(self, value: Token, children: List[Token]) -> None:
-        super().__init__(value, children=children)
+class BaseExpression(ASTNode):
+    def __init__(self) -> None:
+        super().__init__()
+
+    def __str__(self) -> str:
+        return f""
+
+
+class MathExpression(ASTNode):
+    def __init__(self) -> None:
+        super().__init__()
+        self.lvalue
+        self.rvalue
+        self.operator
+
+    def __str__(self) -> str:
+        return f""
 
 
 class FuncCall(BaseExpression):
-    def __init__(self, value: Token, children: List[Token]) -> None:
-        super().__init__(value, children)
+    def __init__(self) -> None:
+        super().__init__()
+        self.function_name = []
+        self.arguments = []
+
+    def __str__(self) -> str:
+        return f""
 
 
-class BaseCondition(Node):
-    def __init__(self, value: Token, children: List[Token]) -> None:
-        super().__init__(value, children=children)
+class BaseCondition(ASTNode):
+    def __init__(self) -> None:
+        super().__init__()
+
+    def __str__(self) -> str:
+        return f""
 
 
 class RelationCondition(BaseCondition):
-    def __init__(self, value: Token, children: List[Token]) -> None:
-        super().__init__(value, children)
+    def __init__(self) -> None:
+        super().__init__()
+
+    def __str__(self) -> str:
+        return f""
 
 
-class
+class ParenthesesCondition(BaseCondition):
+    def __init__(self) -> None:
+        super().__init__()
+
+    def __str__(self) -> str:
+        return f""
