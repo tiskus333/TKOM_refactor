@@ -8,7 +8,7 @@ class ClassDefine(ASTNode):
         self.members = members
 
     def __str__(self) -> str:
-        return f"\nClass definition: Name={self.class_name}, BaseClass={self.base_class}, \nMembers={self.members}"
+        return f"\n<Class definition: Name={self.class_name}, BaseClass={self.base_class}, \nMembers={self.members}>"
 
 
 class FunctionDefine(ASTNode):
@@ -19,7 +19,7 @@ class FunctionDefine(ASTNode):
         self.functionBlock = functionBlock
 
     def __str__(self) -> str:
-        return f"\nFunction definiton: Return type={self.return_type}, Name={self.name}, \nParameters={self.parameters}, \nFunction Block={self.functionBlock}"
+        return f"\n<Function definiton: Return type={self.return_type}, Name={self.name}, \nParameters={self.parameters}, {self.functionBlock}>"
 
 
 class VariableDefine(ASTNode):
@@ -28,7 +28,7 @@ class VariableDefine(ASTNode):
         self.name = name
 
     def __str__(self) -> str:
-        return f"\nVariable definition: Type={self.type}, Name={self.name}"
+        return f"\n<Variable definition: Type={self.type}, Name={self.name}>"
 
 
 class ParameterDefine(ASTNode):
@@ -37,7 +37,7 @@ class ParameterDefine(ASTNode):
         self.name = name
 
     def __str__(self) -> str:
-        return f"\nParameter definition: Type={self.type}, Name={self.name}"
+        return f"\n<Parameter definition: Type={self.type}, Name={self.name}>"
 
 
 class IfStatement(ASTNode):
@@ -47,7 +47,7 @@ class IfStatement(ASTNode):
         self.elseBlock = elseBlock
 
     def __str__(self) -> str:
-        return f"\nIF statement: Condition={self.condition}, ifBlock={self.ifBlock}, ElseBlock={self.elseBlock}"
+        return f"\n<IF statement: Condition={self.condition}, ifBlock={self.ifBlock}, ElseBlock={self.elseBlock}>"
 
 
 class WhileStatement(ASTNode):
@@ -56,13 +56,20 @@ class WhileStatement(ASTNode):
         self.statementBlock = statementBlock
 
     def __str__(self) -> str:
-        return f"\nWhile statement: Condition={self.condition}, StatementBlock={self.statementBlock}"
+        return f"\n<While statement: Condition={self.condition}, StatementBlock={self.statementBlock}>"
 
 
 class ReturnStatement(ASTNode):
-    def __init__(self, returnValue, returnType) -> None:
+    def __init__(self, returnValue) -> None:
         self.returnValue = returnValue
-        self.returnType = returnType
 
     def __str__(self) -> str:
-        return f"\n"
+        return f"\n<ReturnStatement: returnValue={self.returnValue}>"
+
+
+class StatementBlock(ASTNode):
+    def __init__(self, statements) -> None:
+        self.statements = statements
+
+    def __str__(self) -> str:
+        return f"\n<StatementBlock: Statements={self.statements}>"
