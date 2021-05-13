@@ -49,9 +49,12 @@ class Parser:
                     'Excpecting "{" after class name', self.__curent_token)
             else:
                 self.__getNextToken()
-                while self.__curent_token.type not in ['}', '#EOF']:
+                while self.__curent_token.type != '}':
                     if result := self.__parseDefinition():
                         members.append(result)
+                if self.__getNextToken().type != ';':
+                    raise ParserError(
+                        'Expecting ; after class definition', self.__curent_token)
                 self.__getNextToken()
             return ClassDefine(
                 class_name, base_class, members)
@@ -100,7 +103,13 @@ class Parser:
         return parameters
 
     def __parseArguments(self):
-        pass
+        if self.__curent_token.type == '(':
+            arguments = []
+            while self.__getNextToken().type != ')':
+                if len(arguments) > 0 and self.__curent_token == ',':
+                    self.__getNextToken()
+                if result := self.__parseExpression():
+                    arguments.append(result)
 
     def __parseStatementBlock(self):
         if self.__curent_token.type == '{':
@@ -142,6 +151,17 @@ class Parser:
                 raise ParserError(
                     'Expecting return value after return keyword', self.__curent_token)
         pass
+
+    def __parseNestedName(self):
+        if self.__curent_token.type == '#ID':
+            nested_name = [self.__curent_token.value]
+            while self.__getNextToken().type == '.':
+                if self.__getNextToken().type == '#ID':
+                    nested_name.append(self.__curent_token.value)
+                else:
+                    raise ParserError('Expecting ID after .',
+                                      self.__curent_token)
+            return nested_name
 
     def __parseDefineStatement(self):
         pass
