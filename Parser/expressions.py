@@ -2,53 +2,63 @@ from Parser.tree import *
 
 
 class BaseExpression(ASTNode):
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, value) -> None:
+        self.value = value
 
     def __str__(self) -> str:
-        return f""
+        return f"\nBasicExpression: Value={self.value};"
 
 
 class MathExpression(ASTNode):
-    def __init__(self) -> None:
-        super().__init__()
-        self.lvalue
-        self.rvalue
-        self.operator
+    def __init__(self, lvalue, operator, rvalue) -> None:
+
+        self.lvalue = lvalue
+        self.rvalue = rvalue
+        self.operator = operator
 
     def __str__(self) -> str:
-        return f""
+        return f"\nMathExpression: Operator={self.operator}, Lvalue={self.lvalue}, Rvalue={self.rvalue};"
 
 
-class FuncCall(BaseExpression):
-    def __init__(self) -> None:
-        super().__init__()
-        self.function_name = []
-        self.arguments = []
+class FuncCall(ASTNode):
+    def __init__(self, function_name, arguments) -> None:
+
+        self.function_name = function_name
+        self.arguments = arguments
 
     def __str__(self) -> str:
-        return f""
+        return f'\nFunctionCall: FunctionName = {self.functionName}, Arguments = {self.arguments};'
 
 
 class BaseCondition(ASTNode):
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, condition) -> None:
+        self.condition = condition
 
     def __str__(self) -> str:
-        return f""
+        return f"\nBasicCondition: Condition={self.condition};"
 
 
-class RelationCondition(BaseCondition):
-    def __init__(self) -> None:
-        super().__init__()
-
-    def __str__(self) -> str:
-        return f""
-
-
-class ParenthesesCondition(BaseCondition):
-    def __init__(self) -> None:
-        super().__init__()
+class RelationCondition(ASTNode):
+    def __init__(self, lcond, operator, rcond) -> None:
+        self.lcond = lcond
+        self.operator = operator
+        self.rcond = rcond
 
     def __str__(self) -> str:
-        return f""
+        return f"\nRelationCondition: Operator={self.operator}, Lcond={self.lcond}, Rcond={self.rcond};"
+
+
+class ParenthesesCondition(ASTNode):
+    def __init__(self, value) -> None:
+        self.value = value
+
+    def __str__(self) -> str:
+        return f"\nParenthesesCondition: Value={self.value};"
+
+
+class VariableAccess(ASTNode):
+    def __init__(self, name) -> None:
+        self.name = name
+
+    def __str__(self) -> str:
+        return f"\nVariableAccess {self.name};"
