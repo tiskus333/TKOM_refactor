@@ -9,6 +9,6 @@ if __name__ == "__main__":
     #     pass
     if __name__ == '__main__':
         lexer = Lexer(
-            'class kot: pies { int fun(int c, float d){} float x; void fun2(){} }; void main(){}', direct_input=True)
+            'class kot: pies { int fun(int c, float d){if(){}else{}} float x; void fun2(){} }; void main(){return 2;}', direct_input=True)
         parser = Parser(lexer=lexer)
         print(parser.AST)
