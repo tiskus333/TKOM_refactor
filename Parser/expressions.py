@@ -9,6 +9,14 @@ class BaseExpression(ASTNode):
         return f"\nBasicExpression: Value={self.value};"
 
 
+class Expression(ASTNode):
+    def __init__(self, value) -> None:
+        self.value = value
+
+    def __str__(self) -> str:
+        return f"\nExpression: Value={self.value};"
+
+
 class MathExpression(ASTNode):
     def __init__(self, lvalue, operator, rvalue) -> None:
 
@@ -18,6 +26,14 @@ class MathExpression(ASTNode):
 
     def __str__(self) -> str:
         return f"\nMathExpression: Operator={self.operator}, Lvalue={self.lvalue}, Rvalue={self.rvalue};"
+
+
+class ParenthesesExpression(ASTNode):
+    def __init__(self, value) -> None:
+        self.value = value
+
+    def __str__(self) -> str:
+        return f"\nParenthesesExpression: Value={self.value};"
 
 
 class FuncCall(ASTNode):
@@ -62,3 +78,11 @@ class VariableAccess(ASTNode):
 
     def __str__(self) -> str:
         return f"\nVariableAccess {self.name};"
+
+
+class Negation(ASTNode):
+    def __init__(self, value) -> None:
+        self.value = value
+
+    def __str__(self) -> str:
+        return f"\nNegation: Value={self.value};"
