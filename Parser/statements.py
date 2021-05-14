@@ -73,3 +73,12 @@ class StatementBlock(ASTNode):
 
     def __str__(self) -> str:
         return f"\n<StatementBlock: Statements={self.statements}>"
+
+
+class AssignStatement(ASTNode):
+    def __init__(self, assignee, expression) -> None:
+        self.assignee = assignee
+        self.expression = expression
+
+    def __str__(self) -> str:
+        return f"\n<AssignStatement: Assignee={self.assignee}, value={self.expression}>"

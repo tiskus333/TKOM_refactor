@@ -62,7 +62,7 @@ class Parser:
 
     def __parseDefinition(self):
         if type := self.__parseType():
-            if self.__getNextToken().type in ['#ID', 'main']:
+            if self.__current_token.type in ['#ID', 'main']:
                 name = self.__current_token.value
             else:
                 raise ParserError('Excpecting ID after type',
@@ -91,7 +91,7 @@ class Parser:
                 if len(parameters) > 0 and self.__current_token.type == ',':
                     self.__getNextToken()
                 if type := self.__parseType():
-                    if self.__getNextToken().type == '#ID':
+                    if self.__current_token.type == '#ID':
                         name = self.__current_token.value
                         parameters.append(ParameterDefine(type, name))
                     else:
@@ -123,8 +123,8 @@ class Parser:
                 for try_parse in [self.__parseIfStatement,
                                   self.__parseWhileStatement,
                                   self.__parseReturnStatement,
-                                  self.__parseDefinition,
                                   self.__parseAssignStatement,
+                                  self.__parseDefinition,
                                   self.__parseFuncCall]:
                     if operation := try_parse():
                         operations.append(operation)
@@ -154,10 +154,12 @@ class Parser:
     def __parseWhileStatement(self):
         if self.__current_token.type == 'while':
             if self.__getNextToken().type == '(':
+                self.__getNextToken()
                 condition = self.__parseCondition()
                 if self.__current_token.type != ')':
                     raise ParserError(
                         'Expecting closing bracket after condition', self.__current_token)
+                self.__getNextToken()
                 statementBlock = self.__parseStatementBlock()
                 return WhileStatement(condition, statementBlock)
             else:
@@ -200,10 +202,20 @@ class Parser:
         else:
             return Expression(lvalue)
 
-    # TODO: work on base expression and assignment
     def __parseAssignStatement(self, name=None):
-        # if name is None:
-        #     name = self.__parseNestedName()
+        if name is None:
+            name = self.__parseNestedName()
+        if operator := self.__parseAssignmentOP():
+            if expression := self.__parseExpression():
+                if self.__current_token.type == ';':
+                    self.__getNextToken()
+                    return AssignStatement(name, expression)
+                else:
+                    raise ParserError(
+                        'Expecting ; after assignment operation', self.__current_token)
+            else:
+                raise ParserError(
+                    'Expecting expression after assignment operator', self.__current_token)
         pass
 
     def __parseBaseExpression(self):
@@ -260,10 +272,11 @@ class Parser:
             raise ParserError('Expecting ( after !', self.__current_token)
 
     def __parseType(self):
-        if self.__current_token.type in ['int', 'float', 'void', '#ID']:
-            return self.__current_token.value
-        else:
-            return None
+        x = self.__current_token
+        if x.type in ['int', 'float', 'void', '#ID']:
+            self.__getNextToken()
+            if self.__current_token.type != '.':
+                return x.value
 
     def __parseNumber(self):
         x = self.__current_token
@@ -278,8 +291,10 @@ class Parser:
             return x.value
 
     def __parseAssignmentOP(self):
-        if self.__current_token.type == '=':
-            return self.__current_token.type
+        x = self.__current_token
+        if x.type == '=':
+            self.__getNextToken()
+            return x.type
 
     def __parseRelationOp(self):
         x = self.__current_token
@@ -306,5 +321,5 @@ class Parser:
 
         elif self.__current_token.type == '=':
             self.__parseAssignStatement(name)
-        # else:
-        #     return VariableAccess(name)
+        else:
+            return VariableAccess(name)
