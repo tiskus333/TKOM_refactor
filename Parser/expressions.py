@@ -43,7 +43,7 @@ class FuncCall(ASTNode):
         self.arguments = arguments
 
     def __str__(self) -> str:
-        return f'\nFunctionCall: FunctionName = {self.functionName}, Arguments = {self.arguments};'
+        return f'\nFunctionCall: FunctionName = {self.function_name}, Arguments = {self.arguments};'
 
 
 class BaseCondition(ASTNode):
