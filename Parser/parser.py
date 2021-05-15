@@ -170,7 +170,7 @@ class Parser:
                 condition = self.__parseCondition()
                 if self.__current_token.type != ')':
                     raise ParserError(
-                        'Expecting ( after condition', self.__current_token)
+                        'Expecting ) after condition', self.__current_token)
                 if self.__getNextToken().type != '{':
                     raise ParserError(
                         'Expecting { after while condition', self.__current_token)
