@@ -1,10 +1,8 @@
-from Parser.tree import *
 from typing import Optional
 from Lexer.token import Token
 from errors import ParserError
 from Lexer.lexer import Lexer
-from Parser.statements import *
-from Parser.expressions import *
+from Parser.types import *
 
 
 class Parser:
@@ -267,7 +265,7 @@ class Parser:
         if operator := self.__parseRelationOp():
             rcond = self.__parseBaseCondition()
             return RelationCondition(lcond, operator, rcond)
-        return BaseCondition(lcond)
+        return lcond
 
     def __parseBaseCondition(self):
         if self.__parseLogicNegationOp():
