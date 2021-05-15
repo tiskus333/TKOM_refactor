@@ -243,16 +243,14 @@ class Parser:
                           self.__parseFuncCall, ]:
             if value := try_parse():
                 break
+
+        if negation:
+            return Negation(value)
+
         if try_parse == self.__parseNumber:
-            if not negation:
-                return BaseExpression(value)
-            else:
-                return Negation(value)
+            return BaseExpression(value)
         else:
-            if not negation:
-                return value
-            else:
-                return LogicNegation(value)
+            return value
 
     def __parseParenthesesExpression(self):
         if self.__current_token.type == '(':
@@ -274,7 +272,7 @@ class Parser:
 
     def __parseBaseCondition(self):
         if self.__parseLogicNegationOp():
-            return Negation(self.__parseParenthesesCondition())
+            return LogicNegation(self.__parseParenthesesCondition())
         else:
             return self.__parseExpression()
 
@@ -282,8 +280,7 @@ class Parser:
         if self.__current_token.type == '(':
             self.__getNextToken()
             condition = self.__parseCondition()
-            self.__getNextToken()
-            if self.__current_token.type == ')':
+            if self.__getNextToken().type == ')':
                 return ParenthesesCondition(condition)
             else:
                 raise ParserError('Expecting ) after condition',
