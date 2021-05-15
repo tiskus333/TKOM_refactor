@@ -237,17 +237,22 @@ class Parser:
     def __parseBaseExpression(self):
         if negation := self.__current_token.type == '-':
             self.__getNextToken()
-
+        # try_parse = None
         for try_parse in [self.__parseNumber,
                           self.__parseParenthesesExpression,
                           self.__parseFuncCall, ]:
             if value := try_parse():
                 break
-
-        if not negation:
-            return BaseExpression(value)
+        if try_parse == self.__parseNumber:
+            if not negation:
+                return BaseExpression(value)
+            else:
+                return Negation(value)
         else:
-            return Negation(value)
+            if not negation:
+                return value
+            else:
+                return LogicNegation(value)
 
     def __parseParenthesesExpression(self):
         if self.__current_token.type == '(':
