@@ -104,7 +104,7 @@ class ReturnStatement(ASTNode):
     def __str__(self) -> str:
         global tree_print_offset
         tree_print_offset += 4
-        ret = f"\n{' '*tree_print_offset}ReturnStatement: returnValue={self.returnValue}"
+        ret = f"\n{' '*tree_print_offset}ReturnStatement: {self.returnValue}"
         tree_print_offset -= 4
         return ret
 
@@ -130,7 +130,7 @@ class AssignStatement(ASTNode):
     def __str__(self) -> str:
         global tree_print_offset
         tree_print_offset += 4
-        ret = f"\n{' '*tree_print_offset}AssignStatement: Assignee={self.assignee}; value={self.expression}"
+        ret = f"\n{' '*tree_print_offset}AssignStatement: Assignee={self.assignee}; {self.expression}"
         tree_print_offset -= 4
         return ret
 
@@ -142,7 +142,7 @@ class BaseExpression(ASTNode):
     def __str__(self) -> str:
         global tree_print_offset
         tree_print_offset += 4
-        ret = f"\n{' '*tree_print_offset}BasicExpression: Value={self.value}"
+        ret = f"\n{' '*tree_print_offset}BasicExpression: {self.value}"
         tree_print_offset -= 4
         return ret
 
@@ -154,7 +154,7 @@ class Expression(ASTNode):
     def __str__(self) -> str:
         global tree_print_offset
         tree_print_offset += 4
-        ret = f"\n{' '*tree_print_offset}Expression: Value={self.value}"
+        ret = f"\n{' '*tree_print_offset}Expression: {self.value}"
         tree_print_offset -= 4
         return ret
 
@@ -169,7 +169,7 @@ class MathExpression(ASTNode):
     def __str__(self) -> str:
         global tree_print_offset
         tree_print_offset += 4
-        ret = f"\n{' '*tree_print_offset}MathExpression: Operator={self.operator}, Lvalue={self.lvalue}, Rvalue={self.rvalue}"
+        ret = f"\n{' '*tree_print_offset}MathExpression: operator {self.operator}, {self.lvalue}, {self.rvalue}"
         tree_print_offset -= 4
         return ret
 
@@ -181,7 +181,7 @@ class ParenthesesExpression(ASTNode):
     def __str__(self) -> str:
         global tree_print_offset
         tree_print_offset += 4
-        ret = f"\n{' '*tree_print_offset}ParenthesesExpression: Value={self.value}"
+        ret = f"\n{' '*tree_print_offset}ParenthesesExpression: {self.value}"
         tree_print_offset -= 4
         return ret
 
@@ -221,7 +221,7 @@ class RelationCondition(ASTNode):
     def __str__(self) -> str:
         global tree_print_offset
         tree_print_offset += 4
-        ret = f"\n{' '*tree_print_offset}RelationCondition: Operator={self.operator},{self.lcond}, {self.rcond}"
+        ret = f"\n{' '*tree_print_offset}RelationCondition: operator {self.operator},{self.lcond}, {self.rcond}"
         tree_print_offset -= 4
         return ret
 
@@ -257,6 +257,18 @@ class Negation(ASTNode):
     def __str__(self) -> str:
         global tree_print_offset
         tree_print_offset += 4
-        ret = f"\n{' '*tree_print_offset}Negation: Value={self.value}"
+        ret = f"\n{' '*tree_print_offset}Negation: {self.value}"
+        tree_print_offset -= 4
+        return ret
+
+
+class LogicNegation(ASTNode):
+    def __init__(self, value) -> None:
+        self.value = value
+
+    def __str__(self) -> str:
+        global tree_print_offset
+        tree_print_offset += 4
+        ret = f"\n{' '*tree_print_offset}LogicNegation: {self.value}"
         tree_print_offset -= 4
         return ret
