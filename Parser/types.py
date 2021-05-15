@@ -35,7 +35,6 @@ class FunctionDefine(ASTNode):
 
     def __str__(self) -> str:
         global tree_print_offset
-        temp_offset = tree_print_offset
         ret = f"\n{' '*tree_print_offset}Function definiton: ReturnType = {self.return_type}; Name = {self.name}; "
         tree_print_offset += 4
         ret += f"\n{' '*tree_print_offset}Parameters={self.parameters};{self.functionBlock}"
@@ -78,8 +77,7 @@ class IfStatement(ASTNode):
     def __str__(self) -> str:
         global tree_print_offset
         tree_print_offset += 4
-        ret = f"\n{' '*tree_print_offset}IfStatement:"
-        ret += f"{self.condition}; {self.ifBlock}; {self.elseBlock}"
+        ret = f"\n{' '*tree_print_offset}IfStatement:{self.condition}; {self.ifBlock}; {self.elseBlock}"
         tree_print_offset -= 4
         return ret
 
@@ -116,8 +114,7 @@ class StatementBlock(ASTNode):
     def __str__(self) -> str:
         global tree_print_offset
         tree_print_offset += 2
-        ret = f"\n{' '*tree_print_offset}StatementBlock:"
-        ret += f"{self.statements}"
+        ret = f"\n{' '*tree_print_offset}StatementBlock:{self.statements}"
         tree_print_offset -= 2
         return ret
 

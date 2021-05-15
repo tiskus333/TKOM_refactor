@@ -237,7 +237,6 @@ class Parser:
     def __parseBaseExpression(self):
         if negation := self.__current_token.type == '-':
             self.__getNextToken()
-        # try_parse = None
         for try_parse in [self.__parseNumber,
                           self.__parseParenthesesExpression,
                           self.__parseFuncCall, ]:
