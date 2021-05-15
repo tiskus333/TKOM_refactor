@@ -339,5 +339,5 @@ class Parser:
 
         elif self.__current_token.type == '=':
             self.__parseAssignStatement(name)
-        else:
+        elif self.__current_token.type not in [';', '{']:
             return VariableAccess(name)
