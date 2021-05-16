@@ -9,7 +9,7 @@ python main.py
 coverage run -m  unittest discover -v; coverage xml; coverage report -m
 
 # Przykładowe wypisanie drzewa
-[
+```[
 Class definition: Name=kot; BaseClass=pies; 
     Members=[
     Function definiton: ReturnType = int; Name = fun; 
@@ -59,3 +59,4 @@ Function definiton: ReturnType = void; Name = main;
               MathExpression: operator -,
                   BasicExpression: 2,
                   BasicExpression: 3]]
+```
