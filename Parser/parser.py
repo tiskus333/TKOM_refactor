@@ -64,17 +64,14 @@ class Parser:
         if type:
             if self.__current_token.type in ['#ID', 'main']:
                 name = self.__current_token.value
-            else:
-                raise ParserError('Excpecting ID after type',
-                                  self.__current_token)
+            elif self.__current_token.value in self.__lexer.TokenList:
+                raise ParserError(
+                    'Variable cannot be named with reserved keyword', self.__current_token)
             if self.__getNextToken().type == '(':
                 parameters = self.parseParameters()
                 functionBlock = self.parseStatementBlock()
                 return FunctionDefine(type, name, parameters, functionBlock)
             elif self.__current_token.type == ';':
-                if name in self.__lexer.TokenList:
-                    raise ParserError(
-                        'Variable cannot be named with reserved keyword', self.__current_token)
                 if type == 'void':
                     raise ParserError(
                         'Variable cannot be of type void', self.__current_token)

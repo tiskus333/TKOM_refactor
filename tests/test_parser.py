@@ -288,8 +288,7 @@ class TestParser(unittest.TestCase):
     def test_Error_emptyExpression(self):
         lexer = Lexer('', direct_input=True)
         parser = Parser(lexer, tests=True)
-        with self.assertRaises(ParserError):
-            parser.parseExpression()
+        self.assertEqual(parser.parseExpression(), None)
 
     def test_Error_Arguments_missing_argument(self):
         lexer = Lexer('(x,)', direct_input=True)
@@ -334,7 +333,13 @@ class TestParser(unittest.TestCase):
             parser.parseDefinition()
 
     def test_Error_Definiton_keyword(self):
-        lexer = Lexer('int while;', direct_input=True)
+        lexer = Lexer('int int;', direct_input=True)
+        parser = Parser(lexer, tests=True)
+        with self.assertRaises(ParserError):
+            parser.parseDefinition()
+
+    def test_Error_Definiton_keyword_2(self):
+        lexer = Lexer('int while(){}', direct_input=True)
         parser = Parser(lexer, tests=True)
         with self.assertRaises(ParserError):
             parser.parseDefinition()
