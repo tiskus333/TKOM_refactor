@@ -6,4 +6,4 @@ pip3 install coverage
 # Uruchomienie programu
 python main.py
 # Uruchomienie testow
-coverage run -m  unittest Tests.lexerTest.test_lexer -v; coverage xml; coverage report -m
+coverage run -m  unittest discover -v; coverage xml; coverage report -m

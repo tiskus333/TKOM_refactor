@@ -5,7 +5,7 @@ from errors import LexerError
 
 class TestLexer(unittest.TestCase):
     def test_CheckKeywords(self):
-        lexer = Lexer("Tests/lexerTest/alltokens.txt")
+        lexer = Lexer("Tests/alltokens.txt")
         ExpectedTokenList = ["# Keywords", "main", "class", "if", "else", "void", "float", "int", "return",  "while",
                              "# single-character tokens", '(', ')', '{', '}', ':', ';', ',', '.', '!', '=', '+', '-', '<', '>',
                              "# double-character tokens", '==', '!=', '<=', '>=',
@@ -82,18 +82,18 @@ class TestLexer(unittest.TestCase):
                              expecetedPositions[i])
 
     def test_EmptyFile(self):
-        lexer = Lexer("Tests/lexerTest/empty.txt")
+        lexer = Lexer("Tests/empty.txt")
         self.assertEqual(lexer.buildToken().type, '#EOF')
 
     def test_ErrorInFile(self):
-        lexer = Lexer("Tests/lexerTest/errorfile.txt")
+        lexer = Lexer("Tests/errorfile.txt")
         with self.assertRaises(LexerError):
             while lexer.buildToken().value != '#EOF':
                 pass
 
     def test_NoFile(self):
         with self.assertRaises(IOError):
-            lexer = Lexer("Tests/lexerTest/no_such_file.txt")
+            lexer = Lexer("Tests/no_such_file.txt")
 
     def test_PrintToken(self):
         lexer = Lexer("token", direct_input=True)
