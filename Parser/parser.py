@@ -81,6 +81,24 @@ class Parser:
                 raise ParserError(
                     'Excpecting ; after variable definiton', self.__current_token)
 
+    def parseFuncCall(self, name=None):
+        if name is None:
+            name = self.parseNestedName()
+        if name and self.__current_token.type == '(':
+            arguments = self.parseArguments()
+            self.__getNextToken()
+            return FuncCall(name, arguments)
+
+    def parseVariableAccess(self):
+        if self.__current_token.type == '#ID':
+            if name := self.parseNestedName():
+                if self.__current_token.type == '(':
+                    return self.parseFuncCall(name)
+                if self.__current_token.type == '=':
+                    return self.parseAssignStatement(name)
+                else:
+                    return VariableAccess(name)
+
     def parseParameters(self):
         if self.__current_token.type == '(':
             parameters = []
@@ -190,17 +208,6 @@ class Parser:
                 raise ParserError(
                     'Expecting ; after return value', self.__current_token)
 
-    def parseNestedName(self):
-        if self.__current_token.type == '#ID':
-            nested_name = [self.__current_token.value]
-            while self.__getNextToken().type == '.':
-                if self.__getNextToken().type == '#ID':
-                    nested_name.append(self.__current_token.value)
-                else:
-                    raise ParserError('Expecting ID after .',
-                                      self.__current_token)
-            return nested_name
-
     def parseAssignStatement(self, name=None):
         if name is None:
             name = self.parseNestedName()
@@ -278,6 +285,17 @@ class Parser:
         else:
             raise ParserError('Expecting ( after !', self.__current_token)
 
+    def parseNestedName(self):
+        if self.__current_token.type == '#ID':
+            nested_name = [self.__current_token.value]
+            while self.__getNextToken().type == '.':
+                if self.__getNextToken().type == '#ID':
+                    nested_name.append(self.__current_token.value)
+                else:
+                    raise ParserError('Expecting ID after .',
+                                      self.__current_token)
+            return nested_name
+
     def parseType(self):
         x = self.__current_token
         if x.type in ['int', 'float', 'void', '#ID']:
@@ -314,21 +332,3 @@ class Parser:
         if x.type in ['-', '+']:
             self.__getNextToken()
             return x.value
-
-    def parseFuncCall(self, name=None):
-        if name is None:
-            name = self.parseNestedName()
-        if name and self.__current_token.type == '(':
-            arguments = self.parseArguments()
-            self.__getNextToken()
-            return FuncCall(name, arguments)
-
-    def parseVariableAccess(self):
-        if self.__current_token.type == '#ID':
-            if name := self.parseNestedName():
-                if self.__current_token.type == '(':
-                    return self.parseFuncCall(name)
-                if self.__current_token.type == '=':
-                    return self.parseAssignStatement()
-                else:
-                    return VariableAccess(name)
