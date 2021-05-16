@@ -6,27 +6,27 @@ from Parser.types import *
 
 
 class Parser:
-    def __init__(self, lexer: Lexer) -> None:
+    def __init__(self, lexer: Lexer, tests=False) -> None:
         assert(lexer is not None)
         self.__lexer = lexer
         self.__current_token: Optional[Token] = None
         self.AST = []
-
-        self.__parseProgram()
+        self.__getNextToken()
+        if not tests:
+            self.parseProgram()
 
     def __getNextToken(self) -> Token:
         self.__current_token = self.__lexer.buildToken()
         return self.__current_token
 
-    def __parseProgram(self):
-        self.__getNextToken()
+    def parseProgram(self):
         while self.__current_token.type != '#EOF':
-            if result := self.__parseClassDefinition():
+            if result := self.parseClassDefinition():
                 self.AST.append(result)
-            if result := self.__parseDefinition():
+            if result := self.parseDefinition():
                 self.AST.append(result)
 
-    def __parseClassDefinition(self):
+    def parseClassDefinition(self):
         if self.__current_token.type == 'class':
             class_name = base_class = None
             members = []
@@ -49,7 +49,7 @@ class Parser:
             else:
                 self.__getNextToken()
                 while self.__current_token.type != '}':
-                    if result := self.__parseDefinition():
+                    if result := self.parseDefinition():
                         members.append(result)
                 if self.__getNextToken().type != ';':
                     raise ParserError(
@@ -58,9 +58,9 @@ class Parser:
             return ClassDefine(
                 class_name, base_class, members)
 
-    def __parseDefinition(self, type=None):
+    def parseDefinition(self, type=None):
         if type is None:
-            type = self.__parseType()
+            type = self.parseType()
         if type:
             if self.__current_token.type in ['#ID', 'main']:
                 name = self.__current_token.value
@@ -68,8 +68,8 @@ class Parser:
                 raise ParserError('Excpecting ID after type',
                                   self.__current_token)
             if self.__getNextToken().type == '(':
-                parameters = self.__parseParameters()
-                functionBlock = self.__parseStatementBlock()
+                parameters = self.parseParameters()
+                functionBlock = self.parseStatementBlock()
                 return FunctionDefine(type, name, parameters, functionBlock)
             elif self.__current_token.type == ';':
                 if name == 'main':
@@ -84,13 +84,13 @@ class Parser:
                 raise ParserError(
                     'Excpecting ; after variable definiton', self.__current_token)
 
-    def __parseParameters(self):
+    def parseParameters(self):
         if self.__current_token.type == '(':
             parameters = []
             while self.__getNextToken().type != ')':
                 if len(parameters) > 0 and self.__current_token.type == ',':
                     self.__getNextToken()
-                if type := self.__parseType():
+                if type := self.parseType():
                     if self.__current_token.type == '#ID':
                         name = self.__current_token.value
                         parameters.append(ParameterDefine(type, name))
@@ -106,31 +106,31 @@ class Parser:
             self.__getNextToken()
         return parameters
 
-    def __parseArguments(self):
+    def parseArguments(self):
         if self.__current_token.type == '(':
             arguments = []
             self.__getNextToken()
             while self.__current_token.type != ')':
                 if len(arguments) > 0 and self.__current_token.type == ',':
                     self.__getNextToken()
-                if result := self.__parseExpression():
+                if result := self.parseExpression():
                     arguments.append(result)
                 else:
                     raise ParserError(
                         'Expecting expression in arguments', self.__current_token)
             return arguments
 
-    def __parseStatementBlock(self):
+    def parseStatementBlock(self):
         if self.__current_token.type == '{':
             operations = []
             self.__getNextToken()
             while self.__current_token.type != '}':
-                for try_parse in [self.__parseIfStatement,
-                                  self.__parseWhileStatement,
-                                  self.__parseReturnStatement,
-                                  self.__parseAssignStatement,
-                                  self.__parseFuncCall,
-                                  self.__parseDefinition
+                for try_parse in [self.parseIfStatement,
+                                  self.parseWhileStatement,
+                                  self.parseReturnStatement,
+                                  self.parseAssignStatement,
+                                  self.parseFuncCall,
+                                  self.parseDefinition
                                   ]:
                     if operation := try_parse():
                         operations.append(operation)
@@ -144,59 +144,57 @@ class Parser:
             self.__getNextToken()
             return StatementBlock(operations)
 
-    def __parseIfStatement(self):
+    def parseIfStatement(self):
         if self.__current_token.type == 'if':
             if self.__getNextToken().type == '(':
                 self.__getNextToken()
-                condition = self.__parseCondition()
+                condition = self.parseCondition()
                 if self.__current_token.type != ')':
                     raise ParserError(
                         "Expecting ) after condition", self.__current_token)
                 self.__getNextToken()
-                ifBlock = self.__parseStatementBlock()
-                elseBlock = None
-                if self.__current_token.type == 'else':
-                    self.__getNextToken()
-                    elseBlock = self.__parseStatementBlock()
-                return IfStatement(condition, ifBlock, elseBlock)
+                if ifBlock := self.parseStatementBlock():
+                    elseBlock = None
+                    if self.__current_token.type == 'else':
+                        self.__getNextToken()
+                        elseBlock = self.parseStatementBlock()
+                    return IfStatement(condition, ifBlock, elseBlock)
+                else:
+                    raise ParserError(
+                        'Expecting { after if condition', self.__current_token)
             else:
                 raise ParserError(
                     "Expecting ( after if token", self.__current_token)
 
-    def __parseWhileStatement(self):
+    def parseWhileStatement(self):
         if self.__current_token.type == 'while':
             if self.__getNextToken().type == '(':
                 self.__getNextToken()
-                condition = self.__parseCondition()
+                condition = self.parseCondition()
                 if self.__current_token.type != ')':
                     raise ParserError(
                         'Expecting ) after condition', self.__current_token)
                 if self.__getNextToken().type != '{':
                     raise ParserError(
                         'Expecting { after while condition', self.__current_token)
-                statementBlock = self.__parseStatementBlock()
+                statementBlock = self.parseStatementBlock()
                 return WhileStatement(condition, statementBlock)
             else:
                 raise ParserError(
                     'Expecting ( after while token', self.__current_token)
 
-    def __parseReturnStatement(self):
+    def parseReturnStatement(self):
         if self.__current_token.type == 'return':
             self.__getNextToken()
-            return_value = self.__parseExpression()
-            if not return_value is None:
-                if self.__current_token.type == ';':
-                    self.__getNextToken()
-                    return ReturnStatement(return_value)
-                else:
-                    raise ParserError(
-                        'Expecting ; after return value', self.__current_token)
-            else:
+            return_value = self.parseExpression()
+            if self.__current_token.type == ';':
                 self.__getNextToken()
+                return ReturnStatement(return_value)
+            else:
                 raise ParserError(
-                    'Expecting return value after return keyword', self.__current_token)
+                    'Expecting ; after return value', self.__current_token)
 
-    def __parseNestedName(self):
+    def parseNestedName(self):
         if self.__current_token.type == '#ID':
             nested_name = [self.__current_token.value]
             while self.__getNextToken().type == '.':
@@ -207,19 +205,19 @@ class Parser:
                                       self.__current_token)
             return nested_name
 
-    def __parseExpression(self):
-        lvalue = self.__parseBaseExpression()
-        if operator := self.__parseAdditiveOp():
-            rvalue = self.__parseExpression()
+    def parseExpression(self):
+        lvalue = self.parseBaseExpression()
+        if operator := self.parseAdditiveOp():
+            rvalue = self.parseExpression()
             return MathExpression(lvalue, operator, rvalue)
         else:
             return lvalue
 
-    def __parseAssignStatement(self, name=None):
+    def parseAssignStatement(self, name=None):
         if name is None:
-            name = self.__parseNestedName()
-        if operator := self.__parseAssignmentOP():
-            if expression := self.__parseExpression():
+            name = self.parseNestedName()
+        if operator := self.parseAssignmentOP():
+            if expression := self.parseExpression():
                 if self.__current_token.type == ';':
                     self.__getNextToken()
                     return AssignStatement(name, expression)
@@ -230,31 +228,31 @@ class Parser:
                 raise ParserError(
                     'Expecting expression after assignment operator', self.__current_token)
         elif self.__current_token.type == '(':
-            return self.__parseFuncCall(name)
+            return self.parseFuncCall(name)
         elif self.__current_token.type == '#ID' and len(name) == 1:
-            return self.__parseDefinition(name)
+            return self.parseDefinition(name)
 
-    def __parseBaseExpression(self):
+    def parseBaseExpression(self):
         if negation := self.__current_token.type == '-':
             self.__getNextToken()
-        for try_parse in [self.__parseNumber,
-                          self.__parseParenthesesExpression,
-                          self.__parseFuncCall, ]:
+        for try_parse in [self.parseNumber,
+                          self.parseParenthesesExpression,
+                          self.parseFuncCall, ]:
             if value := try_parse():
                 break
 
         if negation:
             return Negation(value)
 
-        if try_parse == self.__parseNumber:
+        if try_parse == self.parseNumber:
             return BaseExpression(value)
         else:
             return value
 
-    def __parseParenthesesExpression(self):
+    def parseParenthesesExpression(self):
         if self.__current_token.type == '(':
             self.__getNextToken()
-            expression = self.__parseExpression()
+            expression = self.parseExpression()
             if self.__current_token.type == ')':
                 self.__getNextToken()
                 return ParenthesesExpression(expression)
@@ -262,24 +260,24 @@ class Parser:
                 raise ParserError('Expecting ) after expression',
                                   self.__current_token)
 
-    def __parseCondition(self):
-        lcond = self.__parseBaseCondition()
-        if operator := self.__parseRelationOp():
-            rcond = self.__parseBaseCondition()
+    def parseCondition(self):
+        lcond = self.parseBaseCondition()
+        if operator := self.parseRelationOp():
+            rcond = self.parseBaseCondition()
             return RelationCondition(lcond, operator, rcond)
         return lcond
 
-    def __parseBaseCondition(self):
-        if self.__parseLogicNegationOp():
-            return LogicNegation(self.__parseParenthesesCondition())
+    def parseBaseCondition(self):
+        if self.parseLogicNegationOp():
+            return LogicNegation(self.parseParenthesesCondition())
         else:
-            return self.__parseExpression()
+            return self.parseExpression()
 
-    def __parseParenthesesCondition(self):
+    def parseParenthesesCondition(self):
         if self.__current_token.type == '(':
             self.__getNextToken()
-            condition = self.__parseCondition()
-            if self.__getNextToken().type == ')':
+            condition = self.parseCondition()
+            if self.__current_token.type == ')':
                 return ParenthesesCondition(condition)
             else:
                 raise ParserError('Expecting ) after condition',
@@ -287,48 +285,48 @@ class Parser:
         else:
             raise ParserError('Expecting ( after !', self.__current_token)
 
-    def __parseType(self):
+    def parseType(self):
         x = self.__current_token
         if x.type in ['int', 'float', 'void', '#ID']:
             self.__getNextToken()
             if self.__current_token.type != '.':
                 return x.value
 
-    def __parseNumber(self):
+    def parseNumber(self):
         x = self.__current_token
         if x.type in ['#INT_VAL', '#FLOAT_VAL']:
             self.__getNextToken()
             return x.value
 
-    def __parseLogicNegationOp(self):
+    def parseLogicNegationOp(self):
         x = self.__current_token
         if x.type == '!':
             self.__getNextToken()
             return x.value
 
-    def __parseAssignmentOP(self):
+    def parseAssignmentOP(self):
         x = self.__current_token
         if x.type == '=':
             self.__getNextToken()
             return x.type
 
-    def __parseRelationOp(self):
+    def parseRelationOp(self):
         x = self.__current_token
         if x.type in ['<', '>', '<=', '=>', '!=', '==']:
             self.__getNextToken()
             return x.value
 
-    def __parseAdditiveOp(self):
+    def parseAdditiveOp(self):
         x = self.__current_token
         if x.type in ['-', '+']:
             self.__getNextToken()
             return x.value
 
-    def __parseFuncCall(self, name=None):
+    def parseFuncCall(self, name=None):
         if name is None:
-            name = self.__parseNestedName()
+            name = self.parseNestedName()
         if self.__current_token.type == '(':
-            arguments = self.__parseArguments()
+            arguments = self.parseArguments()
             if self.__current_token.type != ')':
                 raise ParserError(
                     'Expecting closing bracket after arguments', self.__current_token)
@@ -337,6 +335,6 @@ class Parser:
                 return FuncCall(name, arguments)
 
         elif self.__current_token.type == '=':
-            self.__parseAssignStatement(name)
-        elif self.__current_token.type not in [';', '{']:
+            self.parseAssignStatement(name)
+        elif self.__current_token.type != '{':
             return VariableAccess(name)

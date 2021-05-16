@@ -1,5 +1,5 @@
 from typing import List
-
+import pickle
 
 tree_print_offset = 0
 
@@ -10,6 +10,12 @@ class ASTNode(object):
 
     def __repr__(self) -> str:
         return self.__str__()
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return pickle.dumps(self) == pickle.dumps(other)
+        else:
+            return False
 
 
 class ClassDefine(ASTNode):

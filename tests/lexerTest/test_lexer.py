@@ -22,7 +22,7 @@ class TestLexer(unittest.TestCase):
         for i in range(len(expectedTokens)):
             self.assertEqual((t := lexer.buildToken()).value,
                              expectedTokens[i])
-            self.assertEqual(t.type, lexer.reservedTokensDict['#ID'])
+            self.assertEqual(t.type, '#ID')
 
     def test_UnknownToken(self):
         unexpectedTokens = ['^', '*', '%', '/', '?',
@@ -83,13 +83,12 @@ class TestLexer(unittest.TestCase):
 
     def test_EmptyFile(self):
         lexer = Lexer("Tests/lexerTest/empty.txt")
-        self.assertEqual(lexer.buildToken().type,
-                         lexer.reservedTokensDict['#EOF'])
+        self.assertEqual(lexer.buildToken().type, '#EOF')
 
     def test_ErrorInFile(self):
         lexer = Lexer("Tests/lexerTest/errorfile.txt")
         with self.assertRaises(LexerError):
-            while lexer.buildToken().value != 'EOF':
+            while lexer.buildToken().value != '#EOF':
                 pass
 
     def test_NoFile(self):
