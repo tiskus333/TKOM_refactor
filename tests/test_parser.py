@@ -178,7 +178,7 @@ class TestParser(unittest.TestCase):
     def test_VariableAccess(self):
         lexer = Lexer('a.b.c', direct_input=True)
         parser = Parser(lexer, tests=True)
-        result = parser.parseFuncCall()
+        result = parser.parseVariableAccess()
         expression = VariableAccess(['a', 'b', 'c'])
         self.assertEqual(result, expression)
 
@@ -284,3 +284,116 @@ class TestParser(unittest.TestCase):
         parser = Parser(lexer, tests=True)
         with self.assertRaises(ParserError):
             parser.parseIfStatement()
+
+    def test_Error_emptyExpression(self):
+        lexer = Lexer('', direct_input=True)
+        parser = Parser(lexer, tests=True)
+        with self.assertRaises(ParserError):
+            parser.parseExpression()
+
+    def test_Error_Arguments_missing_argument(self):
+        lexer = Lexer('(x,)', direct_input=True)
+        parser = Parser(lexer, tests=True)
+        with self.assertRaises(ParserError):
+            parser.parseArguments()
+
+    def test_Error_Arguments_missing_bracker_arguments(self):
+        lexer = Lexer('(x', direct_input=True)
+        parser = Parser(lexer, tests=True)
+        with self.assertRaises(ParserError):
+            parser.parseArguments()
+
+    def test_Error_Parameter_missing_parameter_name(self):
+        lexer = Lexer('(int x, int)', direct_input=True)
+        parser = Parser(lexer, tests=True)
+        with self.assertRaises(ParserError):
+            parser.parseParameters()
+
+    def test_Error_Parameter_missing_parameter(self):
+        lexer = Lexer('(int x,)', direct_input=True)
+        parser = Parser(lexer, tests=True)
+        with self.assertRaises(ParserError):
+            parser.parseParameters()
+
+    def test_Error_Parameter_missing_bracket(self):
+        lexer = Lexer('(int x', direct_input=True)
+        parser = Parser(lexer, tests=True)
+        with self.assertRaises(ParserError):
+            parser.parseParameters()
+
+    def test_Error_Definiton_missing_semicolon(self):
+        lexer = Lexer('int x', direct_input=True)
+        parser = Parser(lexer, tests=True)
+        with self.assertRaises(ParserError):
+            parser.parseDefinition()
+
+    def test_Error_Definiton_missing_name(self):
+        lexer = Lexer('int ;', direct_input=True)
+        parser = Parser(lexer, tests=True)
+        with self.assertRaises(ParserError):
+            parser.parseDefinition()
+
+    def test_Error_Definiton_keyword(self):
+        lexer = Lexer('int while;', direct_input=True)
+        parser = Parser(lexer, tests=True)
+        with self.assertRaises(ParserError):
+            parser.parseDefinition()
+
+    def test_Error_Definiton_void_variable(self):
+        lexer = Lexer('void x;', direct_input=True)
+        parser = Parser(lexer, tests=True)
+        with self.assertRaises(ParserError):
+            parser.parseDefinition()
+
+    def test_Error_Class_missing_semicolon(self):
+        lexer = Lexer('class x{}', direct_input=True)
+        parser = Parser(lexer, tests=True)
+        with self.assertRaises(ParserError):
+            parser.parseClassDefinition()
+
+    def test_Error_Class_missing_name(self):
+        lexer = Lexer('class {};', direct_input=True)
+        parser = Parser(lexer, tests=True)
+        with self.assertRaises(ParserError):
+            parser.parseClassDefinition()
+
+    def test_Error_Class_missing_basename(self):
+        lexer = Lexer('class a: {};', direct_input=True)
+        parser = Parser(lexer, tests=True)
+        with self.assertRaises(ParserError):
+            parser.parseClassDefinition()
+
+    def test_Error_Class_missing_opening(self):
+        lexer = Lexer('class a};', direct_input=True)
+        parser = Parser(lexer, tests=True)
+        with self.assertRaises(ParserError):
+            parser.parseClassDefinition()
+
+    def test_Error_ParenthCond_missing_closing(self):
+        lexer = Lexer('(a>b', direct_input=True)
+        parser = Parser(lexer, tests=True)
+        with self.assertRaises(ParserError):
+            parser.parseParenthesesCondition()
+
+    def test_Error_ParenthExpr_missing_closing(self):
+        lexer = Lexer('(1+2', direct_input=True)
+        parser = Parser(lexer, tests=True)
+        with self.assertRaises(ParserError):
+            parser.parseParenthesesExpression()
+
+    def test_Error_Cond_missing_bracket_negation(self):
+        lexer = Lexer('!a>b)', direct_input=True)
+        parser = Parser(lexer, tests=True)
+        with self.assertRaises(ParserError):
+            parser.parseCondition()
+
+    def test_Error_FuncCall_standalone_semicolon(self):
+        lexer = Lexer('{x.func(b)}', direct_input=True)
+        parser = Parser(lexer, tests=True)
+        with self.assertRaises(ParserError):
+            parser.parseStatementBlock()
+
+    def test_print(self):
+        lexer = Lexer('Tests/ParserTest1.txt')
+        parser = Parser(lexer)
+        print(parser.AST)

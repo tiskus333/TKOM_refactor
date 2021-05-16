@@ -1,0 +1,27 @@
+class kot: pies 
+{ 
+    int fun(int c, float d)
+    {
+        if(!(2>4))
+        {
+            a=1;
+        }
+        else
+        {
+            while(x.a.b < -condfun(innerfun()))
+            {
+                x.func(c,d);
+                a = (2-x);
+            }
+        }
+    } 
+    float x;
+    void fun2()
+    { 
+        return 2+3-x;
+    } 
+};
+void main()
+{
+    return 2-3;
+}
