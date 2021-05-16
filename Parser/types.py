@@ -5,17 +5,12 @@ tree_print_offset = 0
 
 
 class ASTNode(object):
-    def __init__(self) -> None:
-        pass
 
     def __repr__(self) -> str:
         return self.__str__()
 
     def __eq__(self, other):
-        if isinstance(other, self.__class__):
-            return pickle.dumps(self) == pickle.dumps(other)
-        else:
-            return False
+        return isinstance(other, self.__class__) and pickle.dumps(self) == pickle.dumps(other)
 
 
 class ClassDefine(ASTNode):
@@ -150,18 +145,6 @@ class BaseExpression(ASTNode):
         return ret
 
 
-class Expression(ASTNode):
-    def __init__(self, value) -> None:
-        self.value = value
-
-    def __str__(self) -> str:
-        global tree_print_offset
-        tree_print_offset += 4
-        ret = f"\n{' '*tree_print_offset}Expression: {self.value}"
-        tree_print_offset -= 4
-        return ret
-
-
 class MathExpression(ASTNode):
     def __init__(self, lvalue, operator, rvalue) -> None:
 
@@ -199,18 +182,6 @@ class FuncCall(ASTNode):
         global tree_print_offset
         tree_print_offset += 4
         ret = f"\n{' '*tree_print_offset}FunctionCall: FunctionName={self.function_name}, Arguments={self.arguments}"
-        tree_print_offset -= 4
-        return ret
-
-
-class BaseCondition(ASTNode):
-    def __init__(self, condition) -> None:
-        self.condition = condition
-
-    def __str__(self) -> str:
-        global tree_print_offset
-        tree_print_offset += 4
-        ret = f"\n{' '*tree_print_offset}BasicCondition: {self.condition}"
         tree_print_offset -= 4
         return ret
 

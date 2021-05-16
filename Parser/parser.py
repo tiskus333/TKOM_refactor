@@ -72,7 +72,7 @@ class Parser:
                 functionBlock = self.parseStatementBlock()
                 return FunctionDefine(type, name, parameters, functionBlock)
             elif self.__current_token.type == ';':
-                if name == 'main':
+                if name in self.__lexer.TokenList:
                     raise ParserError(
                         'Variable cannot be named with reserved keyword', self.__current_token)
                 if type == 'void':
@@ -97,7 +97,7 @@ class Parser:
                     else:
                         raise ParserError(
                             'Expecting ID after type', self.__current_token)
-                elif self.__current_token.type == '{':
+                elif self.__current_token.type != ')':
                     raise ParserError(
                         'Expecting ) after parameters', self.__current_token)
                 else:
@@ -117,7 +117,7 @@ class Parser:
                     arguments.append(result)
                 else:
                     raise ParserError(
-                        'Expecting expression in arguments', self.__current_token)
+                        'Expecting closing bracket after arguments', self.__current_token)
             return arguments
 
     def parseStatementBlock(self):
@@ -128,8 +128,7 @@ class Parser:
                 for try_parse in [self.parseIfStatement,
                                   self.parseWhileStatement,
                                   self.parseReturnStatement,
-                                  self.parseAssignStatement,
-                                  self.parseFuncCall,
+                                  self.parseVariableAccess,
                                   self.parseDefinition
                                   ]:
                     if operation := try_parse():
@@ -205,18 +204,10 @@ class Parser:
                                       self.__current_token)
             return nested_name
 
-    def parseExpression(self):
-        lvalue = self.parseBaseExpression()
-        if operator := self.parseAdditiveOp():
-            rvalue = self.parseExpression()
-            return MathExpression(lvalue, operator, rvalue)
-        else:
-            return lvalue
-
     def parseAssignStatement(self, name=None):
         if name is None:
             name = self.parseNestedName()
-        if operator := self.parseAssignmentOP():
+        if self.parseAssignmentOP():
             if expression := self.parseExpression():
                 if self.__current_token.type == ';':
                     self.__getNextToken()
@@ -227,27 +218,31 @@ class Parser:
             else:
                 raise ParserError(
                     'Expecting expression after assignment operator', self.__current_token)
-        elif self.__current_token.type == '(':
-            return self.parseFuncCall(name)
-        elif self.__current_token.type == '#ID' and len(name) == 1:
-            return self.parseDefinition(name)
+
+    def parseExpression(self):
+        lvalue = self.parseBaseExpression()
+        if operator := self.parseAdditiveOp():
+            rvalue = self.parseExpression()
+            return MathExpression(lvalue, operator, rvalue)
+        else:
+            return lvalue
 
     def parseBaseExpression(self):
         if negation := self.__current_token.type == '-':
             self.__getNextToken()
         for try_parse in [self.parseNumber,
                           self.parseParenthesesExpression,
-                          self.parseFuncCall, ]:
+                          self.parseVariableAccess, ]:
             if value := try_parse():
                 break
 
         if negation:
             return Negation(value)
-
-        if try_parse == self.parseNumber:
-            return BaseExpression(value)
-        else:
-            return value
+        if try_parse:
+            if try_parse == self.parseNumber:
+                return BaseExpression(value)
+            else:
+                return value
 
     def parseParenthesesExpression(self):
         if self.__current_token.type == '(':
@@ -278,6 +273,7 @@ class Parser:
             self.__getNextToken()
             condition = self.parseCondition()
             if self.__current_token.type == ')':
+                self.__getNextToken()
                 return ParenthesesCondition(condition)
             else:
                 raise ParserError('Expecting ) after condition',
@@ -325,16 +321,17 @@ class Parser:
     def parseFuncCall(self, name=None):
         if name is None:
             name = self.parseNestedName()
-        if self.__current_token.type == '(':
+        if name and self.__current_token.type == '(':
             arguments = self.parseArguments()
-            if self.__current_token.type != ')':
-                raise ParserError(
-                    'Expecting closing bracket after arguments', self.__current_token)
-            else:
-                self.__getNextToken()
-                return FuncCall(name, arguments)
+            self.__getNextToken()
+            return FuncCall(name, arguments)
 
-        elif self.__current_token.type == '=':
-            self.parseAssignStatement(name)
-        elif self.__current_token.type != '{':
-            return VariableAccess(name)
+    def parseVariableAccess(self):
+        if self.__current_token.type == '#ID':
+            if name := self.parseNestedName():
+                if self.__current_token.type == '(':
+                    return self.parseFuncCall(name)
+                if self.__current_token.type == '=':
+                    return self.parseAssignStatement()
+                else:
+                    return VariableAccess(name)
