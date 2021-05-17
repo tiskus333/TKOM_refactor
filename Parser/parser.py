@@ -20,11 +20,14 @@ class Parser:
         return self.__current_token
 
     def parseProgram(self):
-        while self.__current_token.type != '#EOF':
-            if result := self.parseClassDefinition():
-                self.AST.append(result)
-            if result := self.parseDefinition():
-                self.AST.append(result)
+        while result := self.parseAny([self.parseClassDefinition, self.parseDefinition]):
+            self.AST.append(result)
+            if isinstance(result, FunctionDefine) and self.__current_token.type == ';':
+                raise ParserError(
+                    'Unwanted ; after function definition', self.__current_token)
+        if self.__current_token.type != '#EOF':
+            raise ParserError(
+                'Expecting class or function definition', self.__current_token)
 
     def parseClassDefinition(self):
         if self.__current_token.type == 'class':
@@ -48,9 +51,11 @@ class Parser:
                     'Excpecting "{" after class name', self.__current_token)
             else:
                 self.__getNextToken()
-                while self.__current_token.type != '}':
-                    if result := self.parseDefinition():
-                        members.append(result)
+                while result := self.parseDefinition():
+                    members.append(result)
+                if self.__current_token.type != '}':
+                    raise ParserError(
+                        'Excpecting } after class body', self.__current_token)
                 if self.__getNextToken().type != ';':
                     raise ParserError(
                         'Expecting ; after class definition', self.__current_token)
@@ -64,6 +69,9 @@ class Parser:
         if type:
             if self.__current_token.type in ['#ID', 'main']:
                 name = self.__current_token.value
+            elif self.__current_token.type == '(':
+                raise ParserError('Expecting ID after type',
+                                  self.__current_token)
             elif self.__current_token.value in self.__lexer.TokenList:
                 raise ParserError(
                     'Variable cannot be named with reserved keyword', self.__current_token)
@@ -138,25 +146,33 @@ class Parser:
     def parseStatementBlock(self):
         if self.__current_token.type == '{':
             operations = []
+            operation = None
             self.__getNextToken()
-            while self.__current_token.type != '}':
-                for try_parse in [self.parseIfStatement,
-                                  self.parseWhileStatement,
-                                  self.parseReturnStatement,
-                                  self.parseVariableAccess,
-                                  self.parseDefinition
-                                  ]:
-                    if operation := try_parse():
-                        operations.append(operation)
-                        if isinstance(operation, FuncCall):
-                            if self.__current_token.type != ';':
-                                raise ParserError(
-                                    'Expecting ; after function call', self.__current_token)
-                            else:
-                                self.__getNextToken()
-                        break
-            self.__getNextToken()
+            while operation := self.parseAny([
+                    self.parseIfStatement,
+                    self.parseReturnStatement,
+                    self.parseVariableAccess,
+                    self.parseDefinition,
+                    self.parseWhileStatement]):
+                operations.append(operation)
+                if isinstance(operation, FuncCall):
+                    if self.__current_token.type != ';':
+                        raise ParserError(
+                            'Expecting ; after function call', self.__current_token)
+                    else:
+                        self.__getNextToken()
+            if self.__current_token.type == '}':
+                self.__getNextToken()
+            else:
+                raise ParserError(
+                    'Expecting } after statementBlock', self.__current_token)
+
             return StatementBlock(operations)
+
+    def parseAny(self, functions):
+        for f in functions:
+            if result := f():
+                return result
 
     def parseIfStatement(self):
         if self.__current_token.type == 'if':
@@ -172,6 +188,9 @@ class Parser:
                     if self.__current_token.type == 'else':
                         self.__getNextToken()
                         elseBlock = self.parseStatementBlock()
+                    elif self.__current_token.type == '{':
+                        raise ParserError(
+                            'Expecting else keyword before new statement', self.__current_token)
                     return IfStatement(condition, ifBlock, elseBlock)
                 else:
                     raise ParserError(
