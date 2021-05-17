@@ -26,5 +26,8 @@ class LexerError(Error):
 
 class ParserError(Error):
     def __init__(self, message, curr_token) -> None:
-        message += f'\nInstead got {curr_token}'
-        super().__init__(message)
+        line, column = curr_token.position
+        fmessage = f'Line {line}, Column {column}\n'
+        fmessage += message
+        fmessage += f'\nInstead got {curr_token.value}'
+        super().__init__(fmessage)
