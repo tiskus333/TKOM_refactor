@@ -9,6 +9,8 @@ class Lexer:
         self.reservedTokensDict = {'main': 0, 'class': 1, 'if': 2, 'else': 3, 'void': 4, 'float': 5, 'int': 6, 'return': 7, 'while': 8,  '(': 9, ')': 10,
                                    '{': 11, '}': 12, ':': 13, ';': 14, ',': 15, '.': 16,   '!': 17, '=': 18,  '+': 19, '-': 20, '<': 21, '>': 22, '==': 23, '!=': 24, '<=': 25, '>=': 26,  '#ID': 27,  "#INT_VAL": 28, "#FLOAT_VAL": 29, '#COM': 30, '#EOF': 31}
         self.TokenList = self.reservedTokensDict.keys()
+        self.allowedafternumber = [
+            ';', ',', '+', '-', '<', '>', '!', '<=', '>=', '==', '!=', '(', ')', '{', '}', '=', '.']
         self.filehandler = FileHandler(path_name, direct_input)
         self.__getNextChar()
 
@@ -70,6 +72,8 @@ class Lexer:
             collected_chars.append(self.__getCurrChar())
             self.__getNextChar()
 
+        if not (self.__getCurrChar().isspace() or self.__getCurrChar() in self.allowedafternumber):
+            raise errors.LexerError('Invalid token', self.filehandler)
         # Dot indicates float number
         if self.__getCurrChar() == '.':
             collected_chars.append('.')
@@ -80,7 +84,8 @@ class Lexer:
             while self.__getCurrChar().isdecimal():
                 collected_chars.append(self.__getCurrChar())
                 self.__getNextChar()
-
+            if not (self.__getCurrChar().isspace() or self.__getCurrChar() in self.allowedafternumber):
+                raise errors.LexerError('Invalid token', self.filehandler)
             result = ''.join(collected_chars)
             return Token(
                 type="#FLOAT_VAL",
