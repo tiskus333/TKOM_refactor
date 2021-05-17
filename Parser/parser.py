@@ -98,14 +98,13 @@ class Parser:
             return FuncCall(name, arguments)
 
     def parseVariableAccess(self):
-        if self.__current_token.type == '#ID':
-            if name := self.parseNestedName():
-                if self.__current_token.type == '(':
-                    return self.parseFuncCall(name)
-                if self.__current_token.type == '=':
-                    return self.parseAssignStatement(name)
-                else:
-                    return VariableAccess(name)
+        if name := self.parseNestedName():
+            if self.__current_token.type == '(':
+                return self.parseFuncCall(name)
+            if self.__current_token.type == '=':
+                return self.parseAssignStatement(name)
+            else:
+                return VariableAccess(name)
 
     def parseParameters(self):
         if self.__current_token.type == '(':
@@ -153,7 +152,8 @@ class Parser:
                     self.parseReturnStatement,
                     self.parseVariableAccess,
                     self.parseDefinition,
-                    self.parseWhileStatement]):
+                    self.parseWhileStatement,
+                    self.parseStatementBlock]):
                 operations.append(operation)
                 if isinstance(operation, FuncCall):
                     if self.__current_token.type != ';':
@@ -188,9 +188,6 @@ class Parser:
                     if self.__current_token.type == 'else':
                         self.__getNextToken()
                         elseBlock = self.parseStatementBlock()
-                    elif self.__current_token.type == '{':
-                        raise ParserError(
-                            'Expecting else keyword before new statement', self.__current_token)
                     return IfStatement(condition, ifBlock, elseBlock)
                 else:
                     raise ParserError(
@@ -305,6 +302,8 @@ class Parser:
             raise ParserError('Expecting ( after !', self.__current_token)
 
     def parseNestedName(self):
+        if self.__current_token.type == '.':
+            raise ParserError('Expecting ID before .', self.__current_token)
         if self.__current_token.type == '#ID':
             nested_name = [self.__current_token.value]
             while self.__getNextToken().type == '.':

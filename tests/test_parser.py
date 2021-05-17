@@ -98,6 +98,13 @@ class TestParser(unittest.TestCase):
         statementBlock = StatementBlock([])
         self.assertEqual(result, statementBlock)
 
+    def test_StatementBlock_nested(self):
+        lexer = Lexer('{{}}', direct_input=True)
+        parser = Parser(lexer, tests=True)
+        result = parser.parseStatementBlock()
+        statementBlock = StatementBlock([StatementBlock([])])
+        self.assertEqual(result, statementBlock)
+
     def test_BaseExpression(self):
         lexer = Lexer('1 ', direct_input=True)
         parser = Parser(lexer, tests=True)
