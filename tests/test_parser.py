@@ -99,14 +99,14 @@ class TestParser(unittest.TestCase):
         self.assertEqual(result, statementBlock)
 
     def test_BaseExpression(self):
-        lexer = Lexer('1', direct_input=True)
+        lexer = Lexer('1 ', direct_input=True)
         parser = Parser(lexer, tests=True)
         result = parser.parseBaseExpression()
         expression = BaseExpression(1)
         self.assertEqual(result, expression)
 
     def test_MathExpression_simple(self):
-        lexer = Lexer('1+2', direct_input=True)
+        lexer = Lexer('1+2 ', direct_input=True)
         parser = Parser(lexer, tests=True)
         result = parser.parseExpression()
         expression = MathExpression(BaseExpression(1), '+', BaseExpression(2))
@@ -152,7 +152,7 @@ class TestParser(unittest.TestCase):
         self.assertEqual(result, expression)
 
     def test_RelationCondition_simple(self):
-        lexer = Lexer('1!=2', direct_input=True)
+        lexer = Lexer('1!=2 ', direct_input=True)
         parser = Parser(lexer, tests=True)
         result = parser.parseCondition()
         expression = RelationCondition(
@@ -183,7 +183,7 @@ class TestParser(unittest.TestCase):
         self.assertEqual(result, expression)
 
     def test_Negation_number(self):
-        lexer = Lexer('-2', direct_input=True)
+        lexer = Lexer('-2 ', direct_input=True)
         parser = Parser(lexer, tests=True)
         result = parser.parseExpression()
         expression = Negation(2)
@@ -226,7 +226,7 @@ class TestParser(unittest.TestCase):
         self.assertEqual(result, expression)
 
     def test_Error_Assignment_missing_semicolon(self):
-        lexer = Lexer('x = 2', direct_input=True)
+        lexer = Lexer('x = 2 ', direct_input=True)
         parser = Parser(lexer, tests=True)
         with self.assertRaises(ParserError):
             parser.parseAssignStatement()
@@ -281,6 +281,12 @@ class TestParser(unittest.TestCase):
 
     def test_Error_IF_missing_statement(self):
         lexer = Lexer('if(x<2)', direct_input=True)
+        parser = Parser(lexer, tests=True)
+        with self.assertRaises(ParserError):
+            parser.parseIfStatement()
+
+    def test_Error_IF_missing_else(self):
+        lexer = Lexer('if(){}{}', direct_input=True)
         parser = Parser(lexer, tests=True)
         with self.assertRaises(ParserError):
             parser.parseIfStatement()
@@ -350,6 +356,12 @@ class TestParser(unittest.TestCase):
         with self.assertRaises(ParserError):
             parser.parseDefinition()
 
+    def test_Error_Definiton_semicolon_after_func(self):
+        lexer = Lexer('void x(){};', direct_input=True)
+        parser = Parser(lexer, tests=True)
+        with self.assertRaises(ParserError):
+            parser.parseProgram()
+
     def test_Error_Class_missing_semicolon(self):
         lexer = Lexer('class x{}', direct_input=True)
         parser = Parser(lexer, tests=True)
@@ -374,6 +386,12 @@ class TestParser(unittest.TestCase):
         with self.assertRaises(ParserError):
             parser.parseClassDefinition()
 
+    def test_Error_Class_missing_closing(self):
+        lexer = Lexer('class a{;', direct_input=True)
+        parser = Parser(lexer, tests=True)
+        with self.assertRaises(ParserError):
+            parser.parseClassDefinition()
+
     def test_Error_ParenthCond_missing_closing(self):
         lexer = Lexer('(a>b', direct_input=True)
         parser = Parser(lexer, tests=True)
@@ -381,7 +399,7 @@ class TestParser(unittest.TestCase):
             parser.parseParenthesesCondition()
 
     def test_Error_ParenthExpr_missing_closing(self):
-        lexer = Lexer('(1+2', direct_input=True)
+        lexer = Lexer('(1+2 ', direct_input=True)
         parser = Parser(lexer, tests=True)
         with self.assertRaises(ParserError):
             parser.parseParenthesesExpression()
@@ -397,6 +415,24 @@ class TestParser(unittest.TestCase):
         parser = Parser(lexer, tests=True)
         with self.assertRaises(ParserError):
             parser.parseStatementBlock()
+
+    def test_Error_Statement_missing_closing(self):
+        lexer = Lexer('{ int x;', direct_input=True)
+        parser = Parser(lexer, tests=True)
+        with self.assertRaises(ParserError):
+            parser.parseStatementBlock()
+
+    def test_Error_Program_empty(self):
+        lexer = Lexer('1 ', direct_input=True)
+        parser = Parser(lexer, tests=True)
+        with self.assertRaises(ParserError):
+            parser.parseProgram()
+
+    def test_Error_Function(self):
+        lexer = Lexer('a(){}', direct_input=True)
+        parser = Parser(lexer, tests=True)
+        with self.assertRaises(ParserError):
+            parser.parseProgram()
 
     def test_print(self):
         lexer = Lexer('Tests/ParserTest1.txt')

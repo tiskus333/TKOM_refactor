@@ -44,9 +44,13 @@ class TestLexer(unittest.TestCase):
 
     def test_SplitNumberID(self):
         lexer = Lexer("12t_2", direct_input=True)
-        expectedTokens = [12, "t_2"]
-        for i in range(len(expectedTokens)):
-            self.assertEqual(lexer.buildToken().value, expectedTokens[i])
+        with self.assertRaises(LexerError):
+            lexer.buildToken()
+
+    def test_SplitNumberID_float(self):
+        lexer = Lexer("12.1t_2", direct_input=True)
+        with self.assertRaises(LexerError):
+            lexer.buildToken()
 
     def test_TabInsteadSpace(self):
         lexer = Lexer("cos\tam", direct_input=True)
