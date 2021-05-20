@@ -242,8 +242,11 @@ class Parser:
     def parseExpression(self):
         lvalue = self.parseBaseExpression()
         if operator := self.parseAdditiveOp():
-            rvalue = self.parseExpression()
-            return MathExpression(lvalue, operator, rvalue)
+            if rvalue := self.parseExpression():
+                return MathExpression(lvalue, operator, rvalue)
+            else:
+                raise ParserError(
+                    'Expecting expression after operator', self.__current_token)
         else:
             return lvalue
 

@@ -1,4 +1,4 @@
-class kot: pies 
+class A: B 
 { 
     int fun(int c, float d)
     {

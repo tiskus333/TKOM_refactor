@@ -292,12 +292,6 @@ class TestParser(unittest.TestCase):
         with self.assertRaises(ParserError):
             parser.parseIfStatement()
 
-    def test_Error_IF_missing_else(self):
-        lexer = Lexer('if(){}{}', direct_input=True)
-        parser = Parser(lexer, tests=True)
-        with self.assertRaises(ParserError):
-            parser.parseIfStatement()
-
     def test_Error_emptyExpression(self):
         lexer = Lexer('', direct_input=True)
         parser = Parser(lexer, tests=True)
