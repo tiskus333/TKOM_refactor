@@ -4,7 +4,7 @@ import pickle
 tree_print_offset = 0
 
 
-class ASTNode(object):
+class ParserType(object):
 
     def __repr__(self) -> str:
         return self.__str__()
@@ -12,8 +12,11 @@ class ASTNode(object):
     def __eq__(self, other):
         return isinstance(other, self.__class__) and pickle.dumps(self) == pickle.dumps(other)
 
+    def get_children(self):
+        return self.__dict__.values()
 
-class ClassDefine(ASTNode):
+
+class ClassDefine(ParserType):
     def __init__(self, class_name: str, base_class: str, members: List) -> None:
         self.class_name = class_name
         self.base_class = base_class
@@ -27,7 +30,7 @@ class ClassDefine(ASTNode):
         return ret
 
 
-class FunctionDefine(ASTNode):
+class FunctionDefine(ParserType):
     def __init__(self, return_type, name, parameters, functionBlock) -> None:
         self.return_type = return_type
         self.name = name
@@ -43,7 +46,7 @@ class FunctionDefine(ASTNode):
         return ret
 
 
-class VariableDefine(ASTNode):
+class VariableDefine(ParserType):
     def __init__(self, type, name) -> None:
         self.type = type
         self.name = name
@@ -56,7 +59,7 @@ class VariableDefine(ASTNode):
         return ret
 
 
-class ParameterDefine(ASTNode):
+class ParameterDefine(ParserType):
     def __init__(self, type, name) -> None:
         self.type = type
         self.name = name
@@ -69,7 +72,7 @@ class ParameterDefine(ASTNode):
         return ret
 
 
-class IfStatement(ASTNode):
+class IfStatement(ParserType):
     def __init__(self, condition, ifBlock, elseBlock=None) -> None:
         self.condition = condition
         self.ifBlock = ifBlock
@@ -83,7 +86,7 @@ class IfStatement(ASTNode):
         return ret
 
 
-class WhileStatement(ASTNode):
+class WhileStatement(ParserType):
     def __init__(self, condition, statementBlock) -> None:
         self.condition = condition
         self.statementBlock = statementBlock
@@ -96,7 +99,7 @@ class WhileStatement(ASTNode):
         return ret
 
 
-class ReturnStatement(ASTNode):
+class ReturnStatement(ParserType):
     def __init__(self, returnValue) -> None:
         self.returnValue = returnValue
 
@@ -108,7 +111,7 @@ class ReturnStatement(ASTNode):
         return ret
 
 
-class StatementBlock(ASTNode):
+class StatementBlock(ParserType):
     def __init__(self, statements) -> None:
         self.statements = statements
 
@@ -120,7 +123,7 @@ class StatementBlock(ASTNode):
         return ret
 
 
-class AssignStatement(ASTNode):
+class AssignStatement(ParserType):
     def __init__(self, assignee, expression) -> None:
         self.assignee = assignee
         self.expression = expression
@@ -133,7 +136,7 @@ class AssignStatement(ASTNode):
         return ret
 
 
-class BaseExpression(ASTNode):
+class BaseExpression(ParserType):
     def __init__(self, value) -> None:
         self.value = value
 
@@ -145,7 +148,7 @@ class BaseExpression(ASTNode):
         return ret
 
 
-class MathExpression(ASTNode):
+class MathExpression(ParserType):
     def __init__(self, lvalue, operator, rvalue) -> None:
 
         self.lvalue = lvalue
@@ -160,7 +163,7 @@ class MathExpression(ASTNode):
         return ret
 
 
-class ParenthesesExpression(ASTNode):
+class ParenthesesExpression(ParserType):
     def __init__(self, value) -> None:
         self.value = value
 
@@ -172,7 +175,7 @@ class ParenthesesExpression(ASTNode):
         return ret
 
 
-class FuncCall(ASTNode):
+class FuncCall(ParserType):
     def __init__(self, function_name, arguments) -> None:
 
         self.function_name = function_name
@@ -186,7 +189,7 @@ class FuncCall(ASTNode):
         return ret
 
 
-class RelationCondition(ASTNode):
+class RelationCondition(ParserType):
     def __init__(self, lcond, operator, rcond) -> None:
         self.lcond = lcond
         self.operator = operator
@@ -200,7 +203,7 @@ class RelationCondition(ASTNode):
         return ret
 
 
-class ParenthesesCondition(ASTNode):
+class ParenthesesCondition(ParserType):
     def __init__(self, value) -> None:
         self.value = value
 
@@ -212,7 +215,7 @@ class ParenthesesCondition(ASTNode):
         return ret
 
 
-class VariableAccess(ASTNode):
+class VariableAccess(ParserType):
     def __init__(self, name) -> None:
         self.name = name
 
@@ -224,7 +227,7 @@ class VariableAccess(ASTNode):
         return ret
 
 
-class Negation(ASTNode):
+class Negation(ParserType):
     def __init__(self, value) -> None:
         self.value = value
 
@@ -236,7 +239,7 @@ class Negation(ASTNode):
         return ret
 
 
-class LogicNegation(ASTNode):
+class LogicNegation(ParserType):
     def __init__(self, value) -> None:
         self.value = value
 

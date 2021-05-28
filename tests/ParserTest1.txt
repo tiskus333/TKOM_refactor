@@ -8,13 +8,13 @@ class A: B
         }
         else
         {
-            while(x.a.b < -condfun(innerfun()))
+            while(x.ab < -condfun(innerfun()))
             {
                 x.func(c,d);
                 a = (2-x);
             }
         }
-    } 
+    }
     float x;
     void fun2()
     { 
@@ -23,5 +23,8 @@ class A: B
 };
 void main()
 {
+    A a;
+    int x;
+    a.fun(x,2.0);
     return 2-3;
 }
