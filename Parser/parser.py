@@ -69,6 +69,8 @@ class Parser:
         if type:
             if self.__current_token.type in ['#ID', 'main']:
                 name = self.__current_token.value
+            elif self.__current_token.type == '=':
+                return self.parseVariableAccess(type)
             elif self.__current_token.type == '(':
                 raise ParserError('Expecting ID after type',
                                   self.__current_token)
@@ -97,12 +99,16 @@ class Parser:
             self.__getNextToken()
             return FuncCall(name, arguments)
 
-    def parseVariableAccess(self):
-        if name := self.parseNestedName():
+    def parseVariableAccess(self, name=None):
+        if name is None:
+            name = self.parseNestedName()
+        if name:
             if self.__current_token.type == '(':
                 return self.parseFuncCall(name)
             if self.__current_token.type == '=':
                 return self.parseAssignStatement(name)
+            elif self.__current_token.type == '#ID' and len(name) == 1:
+                return self.parseDefinition(name)
             else:
                 return VariableAccess(name)
 
