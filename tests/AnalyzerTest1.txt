@@ -1,0 +1,23 @@
+class B{
+    int c;
+    void funB(){
+
+    }
+};
+class A {
+    int a;
+    B b;
+    int fun(int x, int y)
+    {
+        y = y + a;
+        return x + y;
+    }
+};
+A ob;
+void main(){
+    ob.a = 2;
+    float y;
+    ob.fun(1,ob.c());
+    ob.b.c = 1;
+    ob.b.funB();
+}

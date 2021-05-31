@@ -31,3 +31,10 @@ class ParserError(Error):
         fmessage += message
         fmessage += f'\nInstead got {curr_token.value}'
         super().__init__(fmessage)
+
+
+class AnalyzerError(Error):
+    def __init__(self, message, name, defined=False) -> None:
+        defin = 'not' if not defined else 'already'
+        error_message = f'{message} {name} {defin} defined earlier!'
+        super().__init__(error_message)

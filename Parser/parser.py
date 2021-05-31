@@ -237,7 +237,7 @@ class Parser:
             if expression := self.parseExpression():
                 if self.__current_token.type == ';':
                     self.__getNextToken()
-                    return AssignStatement(name, expression)
+                    return AssignStatement(VariableAccess(name), expression)
                 else:
                     raise ParserError(
                         'Expecting ; after assignment operation', self.__current_token)
@@ -321,7 +321,7 @@ class Parser:
                 else:
                     raise ParserError('Expecting ID after .',
                                       self.__current_token)
-            return nested_name
+            return '.'.join(nested_name)
 
     def parseType(self):
         x = self.__current_token
