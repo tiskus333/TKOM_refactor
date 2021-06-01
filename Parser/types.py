@@ -29,6 +29,16 @@ class ClassDefine(ParserType):
         tree_print_offset -= 4
         return ret
 
+    def to_text(self, indent=0):
+        text = f'class {self.class_name}'
+        if self.base_class:
+            text += f' : {self.base_class.class_name}'
+        text += '\n{\n'
+        for member in self.members:
+            text += member.to_text(indent+1)
+        text += '};\n'
+        return text
+
 
 class FunctionDefine(ParserType):
     def __init__(self, return_type, name, parameters, functionBlock) -> None:
@@ -45,6 +55,17 @@ class FunctionDefine(ParserType):
         tree_print_offset -= 4
         return ret
 
+    def to_text(self, indent=0):
+        text = '\t'*indent + f'{self.return_type} {self.name}('
+        for param in self.parameters:
+            text += param.to_text(0)
+        if len(self.parameters) > 0:
+            text = text[:-2]
+        text += ')'
+        if len(self.functionBlock.statements) > 0:
+            text += self.functionBlock.to_text(indent)
+        return text
+
 
 class VariableDefine(ParserType):
     def __init__(self, type, name) -> None:
@@ -58,6 +79,10 @@ class VariableDefine(ParserType):
         tree_print_offset -= 4
         return ret
 
+    def to_text(self, indent=0):
+        text = '\t'*indent + f'{self.type} {self.name};\n'
+        return text
+
 
 class ParameterDefine(ParserType):
     def __init__(self, type, name) -> None:
@@ -70,6 +95,10 @@ class ParameterDefine(ParserType):
         ret = f"\n{' '*tree_print_offset}Parameter definition: Type={self.type}; Name={self.name}"
         tree_print_offset -= 4
         return ret
+
+    def to_text(self, indent=0):
+        text = '\t'*indent + f'{self.type} {self.name}, '
+        return text
 
 
 class IfStatement(ParserType):
@@ -85,6 +114,13 @@ class IfStatement(ParserType):
         tree_print_offset -= 4
         return ret
 
+    def to_text(self, indent=0):
+        text = '\t'*indent + \
+            f'if({self.condition.to_text()})' + self.ifBlock.to_text(indent)
+        if self.elseBlock:
+            text += '\t'*indent + f' else' + self.elseBlock.to_text(indent)
+        return text
+
 
 class WhileStatement(ParserType):
     def __init__(self, condition, statementBlock) -> None:
@@ -98,6 +134,12 @@ class WhileStatement(ParserType):
         tree_print_offset -= 4
         return ret
 
+    def to_text(self, indent=0):
+        text = '\t'*indent + \
+            f'\nwhile({self.condition})' + \
+            self.statementBlock.to_text(indent)
+        return text
+
 
 class ReturnStatement(ParserType):
     def __init__(self, returnValue) -> None:
@@ -110,6 +152,10 @@ class ReturnStatement(ParserType):
         tree_print_offset -= 4
         return ret
 
+    def to_text(self, indent=0):
+        text = '\t'*indent+f'return {self.returnValue.to_text()};\n'
+        return text
+
 
 class StatementBlock(ParserType):
     def __init__(self, statements) -> None:
@@ -121,6 +167,13 @@ class StatementBlock(ParserType):
         ret = f"\n{' '*tree_print_offset}StatementBlock:{self.statements}"
         tree_print_offset -= 2
         return ret
+
+    def to_text(self, indent=0):
+        text = '\n' + '\t'*indent+'{\n'
+        for statement in self.statements:
+            text += statement.to_text(indent+1)
+        text += '\t'*indent + '}\n'
+        return text
 
 
 class AssignStatement(ParserType):
@@ -135,6 +188,9 @@ class AssignStatement(ParserType):
         tree_print_offset -= 4
         return ret
 
+    def to_text(self, indent=0):
+        return '\t'*indent+f'{self.assignee.to_text()} = {self.expression.to_text()};\n'
+
 
 class BaseExpression(ParserType):
     def __init__(self, value) -> None:
@@ -146,6 +202,9 @@ class BaseExpression(ParserType):
         ret = f"\n{' '*tree_print_offset}BasicExpression: {self.value}"
         tree_print_offset -= 4
         return ret
+
+    def to_text(self, indent=0):
+        return f'{self.value}'
 
 
 class MathExpression(ParserType):
@@ -162,6 +221,9 @@ class MathExpression(ParserType):
         tree_print_offset -= 4
         return ret
 
+    def to_text(self, indent=0):
+        return self.lvalue.to_text() + ' ' + self.operator + ' ' + self.rvalue.to_text()
+
 
 class ParenthesesExpression(ParserType):
     def __init__(self, value) -> None:
@@ -174,12 +236,16 @@ class ParenthesesExpression(ParserType):
         tree_print_offset -= 4
         return ret
 
+    def to_text(self, indent=0):
+        return f'({self.value.to_text()})'
+
 
 class FuncCall(ParserType):
     def __init__(self, function_name, arguments) -> None:
 
         self.function_name = function_name
         self.arguments = arguments
+        self.standalone = False
 
     def __str__(self) -> str:
         global tree_print_offset
@@ -187,6 +253,17 @@ class FuncCall(ParserType):
         ret = f"\n{' '*tree_print_offset}FunctionCall: FunctionName={self.function_name}, Arguments={self.arguments}"
         tree_print_offset -= 4
         return ret
+
+    def to_text(self, indent=0):
+        text = '\t'*indent + f'{self.function_name}('
+        for arg in self.arguments:
+            text += arg.to_text() + ', '
+        if len(self.arguments) > 0:
+            text = text[:-2]
+        text += ')'
+        if self.standalone:
+            text += ';\n'
+        return text
 
 
 class RelationCondition(ParserType):
@@ -202,6 +279,9 @@ class RelationCondition(ParserType):
         tree_print_offset -= 4
         return ret
 
+    def to_text(self, indent=0):
+        return self.lcond.to_text() + ' ' + self.operator + ' ' + self.rcond.to_text()
+
 
 class ParenthesesCondition(ParserType):
     def __init__(self, value) -> None:
@@ -213,6 +293,9 @@ class ParenthesesCondition(ParserType):
         ret = f"\n{' '*tree_print_offset}ParenthesesCondition: {self.value}"
         tree_print_offset -= 4
         return ret
+
+    def to_text(self, indent=0):
+        return f'({self.value.to_text()})'
 
 
 class VariableAccess(ParserType):
@@ -226,6 +309,9 @@ class VariableAccess(ParserType):
         tree_print_offset -= 4
         return ret
 
+    def to_text(self, indent=0):
+        return self.name
+
 
 class Negation(ParserType):
     def __init__(self, value) -> None:
@@ -238,6 +324,9 @@ class Negation(ParserType):
         tree_print_offset -= 4
         return ret
 
+    def to_text(self, indent=0):
+        return f'-{self.value}'
+
 
 class LogicNegation(ParserType):
     def __init__(self, value) -> None:
@@ -249,3 +338,6 @@ class LogicNegation(ParserType):
         ret = f"\n{' '*tree_print_offset}LogicNegation: {self.value}"
         tree_print_offset -= 4
         return ret
+
+    def to_text(self, indent=0):
+        return f'!{self.value}'
