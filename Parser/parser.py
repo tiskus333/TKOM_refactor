@@ -166,6 +166,7 @@ class Parser:
                         raise ParserError(
                             'Expecting ; after function call', self.__current_token)
                     else:
+                        operation.standalone = True
                         self.__getNextToken()
             if self.__current_token.type == '}':
                 self.__getNextToken()
