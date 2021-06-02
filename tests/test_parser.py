@@ -80,7 +80,7 @@ class TestParser(unittest.TestCase):
         lexer = Lexer('return a;', direct_input=True)
         parser = Parser(lexer, tests=True)
         result = parser.parseReturnStatement()
-        returnStatement = ReturnStatement(VariableAccess(['a']))
+        returnStatement = ReturnStatement(VariableAccess('a'))
         self.assertEqual(result, returnStatement)
 
     def test_StatementBlock(self):
@@ -88,7 +88,7 @@ class TestParser(unittest.TestCase):
         parser = Parser(lexer, tests=True)
         result = parser.parseStatementBlock()
         statementBlock = StatementBlock(
-            [ReturnStatement(VariableAccess(['a']))])
+            [ReturnStatement(VariableAccess('a'))])
         self.assertEqual(result, statementBlock)
 
     def test_StatementBlock_empty(self):
@@ -124,7 +124,7 @@ class TestParser(unittest.TestCase):
         parser = Parser(lexer, tests=True)
         result = parser.parseExpression()
         expression = MathExpression(BaseExpression(
-            1), '+', MathExpression(BaseExpression(2), '-', VariableAccess(['x'])))
+            1), '+', MathExpression(BaseExpression(2), '-', VariableAccess('x')))
         self.assertEqual(result, expression)
 
     def test_ParenthesesExpression(self):
@@ -139,7 +139,7 @@ class TestParser(unittest.TestCase):
         lexer = Lexer('func()', direct_input=True)
         parser = Parser(lexer, tests=True)
         result = parser.parseFuncCall()
-        expression = FuncCall(['func'], [])
+        expression = FuncCall('func', [])
         self.assertEqual(result, expression)
 
     def test_FunctionCall_simpleArg(self):
@@ -147,7 +147,7 @@ class TestParser(unittest.TestCase):
         parser = Parser(lexer, tests=True)
         result = parser.parseFuncCall()
         expression = FuncCall(
-            ['func'], [BaseExpression(1), VariableAccess(['x'])])
+            'func', [BaseExpression(1), VariableAccess('x')])
         self.assertEqual(result, expression)
 
     def test_FunctionCall_nestedArg(self):
@@ -155,7 +155,7 @@ class TestParser(unittest.TestCase):
         parser = Parser(lexer, tests=True)
         result = parser.parseFuncCall()
         expression = FuncCall(
-            ['func'], [FuncCall(['fun2'], [VariableAccess(['x'])])])
+            'func', [FuncCall('fun2', [VariableAccess('x')])])
         self.assertEqual(result, expression)
 
     def test_RelationCondition_simple(self):
@@ -171,7 +171,7 @@ class TestParser(unittest.TestCase):
         parser = Parser(lexer, tests=True)
         result = parser.parseCondition()
         expression = RelationCondition(
-            BaseExpression(1), '!=', ParenthesesExpression(MathExpression(VariableAccess(['x']), '+', BaseExpression(2))))
+            BaseExpression(1), '!=', ParenthesesExpression(MathExpression(VariableAccess('x'), '+', BaseExpression(2))))
         self.assertEqual(result, expression)
 
     def test_ParenthesesCondition(self):
@@ -186,7 +186,7 @@ class TestParser(unittest.TestCase):
         lexer = Lexer('a.b.c', direct_input=True)
         parser = Parser(lexer, tests=True)
         result = parser.parseVariableAccess()
-        expression = VariableAccess(['a', 'b', 'c'])
+        expression = VariableAccess('a.b.c')
         self.assertEqual(result, expression)
 
     def test_Negation_number(self):
@@ -200,7 +200,7 @@ class TestParser(unittest.TestCase):
         lexer = Lexer('-x', direct_input=True)
         parser = Parser(lexer, tests=True)
         result = parser.parseExpression()
-        expression = Negation(VariableAccess(['x']))
+        expression = Negation(VariableAccess('x'))
         self.assertEqual(result, expression)
 
     def test_LogicNegation(self):
@@ -215,21 +215,21 @@ class TestParser(unittest.TestCase):
         lexer = Lexer('x = 2;', direct_input=True)
         parser = Parser(lexer, tests=True)
         result = parser.parseAssignStatement()
-        expression = AssignStatement(['x'], BaseExpression(2))
+        expression = AssignStatement(VariableAccess('x'), BaseExpression(2))
         self.assertEqual(result, expression)
 
     def test_Assignments_variable(self):
         lexer = Lexer('x = a;', direct_input=True)
         parser = Parser(lexer, tests=True)
         result = parser.parseAssignStatement()
-        expression = AssignStatement(['x'], VariableAccess(['a']))
+        expression = AssignStatement(VariableAccess('x'), VariableAccess('a'))
         self.assertEqual(result, expression)
 
     def test_Assignments_function(self):
         lexer = Lexer('x = fun();', direct_input=True)
         parser = Parser(lexer, tests=True)
         result = parser.parseAssignStatement()
-        expression = AssignStatement(['x'], FuncCall(['fun'], []))
+        expression = AssignStatement(VariableAccess('x'), FuncCall('fun', []))
         self.assertEqual(result, expression)
 
     def test_Error_Assignment_missing_semicolon(self):
