@@ -1,12 +1,13 @@
 
 
 from os import name
-from errors import AnalyzerError
+from errors import AnalyzerError, ExecutionError
 from Parser.types import *
 
 
 class StaticAnalyzer(object):
-    def __init__(self):
+    def __init__(self, parser):
+        self.parser = parser
         self.clear()
 
     def clear(self):
@@ -168,20 +169,42 @@ class StaticAnalyzer(object):
     def print_members(self):
         print(self.__dict__)
 
-    def save_file(self, tree, file):
+    def save_file(self, file):
         with open(file, 'w') as f:
-            for node in tree:
+            for node in self.parser.AST:
                 f.write(node.to_text())
 
     def change_class_name(self, scope, old_name, new_name):
+        self.clear()
+        self.traverse(self.parser.AST)
         change_class = self.classes.get((scope, old_name))
-
+        if not change_class:
+            raise ExecutionError(
+                f'Class {old_name} does not exist in this scope {scope}')
+        if self.check_all_scopes(scope, new_name, self.classes):
+            raise ExecutionError(
+                f'Class named {new_name} already exists in this scope {scope}')
         for var_def in self.variables_def.values():
             if var_def.type == change_class.class_name:
                 var_def.type = new_name
         for func_def in self.functions_def.values():
             if func_def.return_type == change_class.class_name:
                 func_def.return_type = new_name
-
         change_class.class_name = new_name
-        self.clear()
+
+    def merge_classes(self, scope, name):
+        self.traverse(self.parser.AST)
+        new_class = self.classes.get((scope, name))
+        if not new_class:
+            raise ExecutionError(
+                f'Class {name} does not exist in this scope {scope}')
+        base_class = new_class.base_class
+        new_class.members = base_class.members + new_class.members
+        new_class.base_class = base_class.base_class if base_class.base_class else None
+        remove = True
+        for class_ in self.classes.values():
+            if class_.base_class == base_class:
+                return
+        self.change_class_name(
+            scope, base_class.class_name, name)
+        self.parser.AST.remove(base_class)
