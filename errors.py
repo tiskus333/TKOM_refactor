@@ -38,3 +38,8 @@ class AnalyzerError(Error):
         defin = 'not' if not defined else 'already'
         error_message = f'{message} {name} {defin} defined earlier!'
         super().__init__(error_message)
+
+
+class ExecutionError(Error):
+    def __init__(self, message) -> None:
+        super().__init__(message)
