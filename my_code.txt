@@ -1,4 +1,7 @@
-class D
+class Z
+{
+};
+class B : Z
 {
 	int c;
 	int funB;
@@ -10,21 +13,38 @@ class D
 		}
 		 else
 		{
-			D kupa;
+			B kupa;
 			c = c + 1;
 		}
 	}
 };
-class A : D
+class C : B
 {
+};
+class A : Z
+{
+	int c;
+	int funB;
+	void funB()
+	{
+		if(c > 2)
+		{
+			c = 2;
+		}
+		 else
+		{
+			B kupa;
+			c = c + 1;
+		}
+	}
 	int a;
-	D b;
+	B b;
 	int fun(int x, int y)
 	{
 		y = y + a;
 		return x + y;
 	}
-	D fun2(D b1, D b2)
+	B fun2(B b1, B b2)
 	{
 		return b1.funB + b2.funB;
 	}

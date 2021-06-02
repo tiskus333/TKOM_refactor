@@ -1,7 +1,13 @@
-class B {
+class Z
+{
+
+};
+class B : Z
+{
     int c;
     int funB;
-    void funB(){
+    void funB()
+    {
         if(c > 2)
         {
             c = 2;
@@ -13,7 +19,12 @@ class B {
         }
     }
 };
-class A : B {
+class C : B
+{
+
+};
+class A : B 
+{
     int a;
     B b;
     int fun(int x, int y)
@@ -21,12 +32,14 @@ class A : B {
         y = y + a;
         return x + y;
     }
-    B fun2(B b1, B b2){
+    B fun2(B b1, B b2)
+    {
         return b1.funB + b2.funB;
     }
 };
 A ob;
-void main(){
+void main()
+{
     ob.a = 2;
     float y;
     ob.fun(1,ob.fun(1,2));
