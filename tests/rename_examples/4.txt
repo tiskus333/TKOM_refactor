@@ -1,0 +1,7 @@
+class B
+{
+	B a;
+};
+class C : B
+{
+};
