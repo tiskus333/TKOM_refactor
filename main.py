@@ -24,13 +24,10 @@ if __name__ == '__main__':
     lexer = Lexer(opts.input_file)
     parser = Parser(lexer=lexer)
     analyzer = StaticAnalyzer(parser)
-
     if opts.rename_list:
         for rename in opts.rename_list:
             analyzer.change_class_name(rename[0], rename[1], rename[2])
     if opts.merge_list:
         for merge in opts.merge_list:
             analyzer.merge_classes(merge[0], merge[1])
-
-    # analyzer.traverse(parser.AST)
     analyzer.save_file(file=opts.output_file)

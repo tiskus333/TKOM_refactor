@@ -157,7 +157,7 @@ class StaticAnalyzer(object):
                                         f'Wrong argument type expected {param.type} got {variable.type}')
                 else:
                     raise FunctionError(
-                        f'Function {name} takes only {len(funcdef.parameters)} parameters, {len(funccall.arguments)} provided')
+                        f'Function {name} takes {len(funcdef.parameters)} parameters, {len(funccall.arguments)} provided')
             return funcdef
         return None
 
@@ -167,7 +167,13 @@ class StaticAnalyzer(object):
                 node.base_class, str) else node.base_class.class_name
             if (base_class := self.check_all_scopes(scope, name, self.classes)):
                 node.base_class = base_class
-                self.traverse(base_class.get_children(), scope)
+                for member in base_class.members:
+                    if isinstance(member, VariableDefine):
+                        if not (scope, member.name) in self.variables_def:
+                            self.variables_def[(scope, member.name)] = member
+                    if isinstance(member, FunctionDefine):
+                        if not (scope, member.name) in self.functions_def:
+                            self.functions_def[(scope, member.name)] = member
             else:
                 raise AnalyzerError(
                     'Base Class', node.base_class, defined=False)
@@ -247,7 +253,6 @@ class StaticAnalyzer(object):
         base_class = new_class.base_class
         new_class.members = base_class.members + new_class.members
         new_class.base_class = base_class.base_class if base_class.base_class else None
-        remove = True
         for class_ in self.classes.values():
             if class_.base_class == base_class:
                 return
