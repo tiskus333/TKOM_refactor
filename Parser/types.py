@@ -137,7 +137,7 @@ class WhileStatement(ParserType):
 
     def to_text(self, indent=0):
         text = '\t'*indent + \
-            f'\nwhile({self.condition})' + \
+            f'while({self.condition.to_text()})' + \
             self.statementBlock.to_text(indent)
         return text
 
