@@ -32,5 +32,5 @@ if __name__ == '__main__':
         for merge in opts.merge_list:
             analyzer.merge_classes(merge[0], merge[1])
 
-    analyzer.traverse(parser.AST)
+    # analyzer.traverse(parser.AST)
     analyzer.save_file(file=opts.output_file)

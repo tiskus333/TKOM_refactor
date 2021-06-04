@@ -96,14 +96,6 @@ class TestSemanticErrorrs(unittest.TestCase):
         with self.assertRaises(FunctionError):
             analyzer.traverse(parser.AST)
 
-    def test_NoReturnNonVoid(self):
-        lexer = Lexer(
-            'class A {int f(int i, int j){}}; A a; void main(){a.f(1,2);}', direct_input=True)
-        parser = Parser(lexer)
-        analyzer = StaticAnalyzer(parser)
-        with self.assertRaises(FunctionError):
-            analyzer.traverse(parser.AST)
-
     def test_VoidReturnNonVoid(self):
         lexer = Lexer(
             'class A {int f(int i, int j){return;}}; A a; void main(){a.f(1,2);}', direct_input=True)
