@@ -40,6 +40,11 @@ class AnalyzerError(Error):
         super().__init__(error_message)
 
 
+class FunctionError(Error):
+    def __init__(self, message) -> None:
+        super().__init__(message)
+
+
 class ExecutionError(Error):
     def __init__(self, message) -> None:
         super().__init__(message)
