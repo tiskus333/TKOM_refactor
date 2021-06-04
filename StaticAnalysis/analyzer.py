@@ -85,8 +85,14 @@ class StaticAnalyzer(object):
         if isinstance(node, VariableDefine):
             if (scope, node.name) in self.variables_def:
                 raise AnalyzerError('Variable', node.name, defined=True)
-            # if not self.check_exists_nested(scope, node.type):
-            #     raise AnalyzerError('Class', node.type)
+            if node.type not in ['int', 'float']:
+                found = False
+                for class_ in self.classes.values():
+                    if class_.class_name == node.type:
+                        found = True
+                        break
+                if not found:
+                    raise AnalyzerError('Class', node.type)
             self.variables_def[(scope, node.name)] = node
         pass
 
@@ -161,6 +167,7 @@ class StaticAnalyzer(object):
                 node.base_class, str) else node.base_class.class_name
             if (base_class := self.check_all_scopes(scope, name, self.classes)):
                 node.base_class = base_class
+                self.traverse(base_class.get_children(), scope)
             else:
                 raise AnalyzerError(
                     'Base Class', node.base_class, defined=False)
@@ -194,9 +201,9 @@ class StaticAnalyzer(object):
                         if variable.return_type != function.return_type:
                             raise FunctionError(
                                 f'In function {function.name}: Expecting {function.return_type} as return type instead got {variable.type}')
-        if function.return_type != 'void' and not found:
-            raise FunctionError(
-                'Reached end of non void function without return')
+        # if function.return_type != 'void' and not found:
+        #     raise FunctionError(
+        #         'Reached end of non void function without return')
 
     def print_members(self):
         print(self.__dict__)
@@ -212,14 +219,14 @@ class StaticAnalyzer(object):
             ret += node.to_text()
         return ret
 
-    def change_class_name(self, scope, old_name, new_name):
+    def change_class_name(self, scope, old_name, new_name, force=False):
         self.clear()
         self.traverse(self.parser.AST)
         change_class = self.classes.get((scope, old_name))
         if not change_class:
             raise ExecutionError(
                 f'Class {old_name} does not exist in this scope {scope}')
-        if self.check_all_scopes(scope, new_name, self.classes):
+        if self.check_all_scopes(scope, new_name, self.classes) and not force:
             raise ExecutionError(
                 f'Class {new_name} already exists in this scope {scope}')
         for var_def in self.variables_def.values():
@@ -231,6 +238,7 @@ class StaticAnalyzer(object):
         change_class.class_name = new_name
 
     def merge_classes(self, scope, name):
+        self.clear()
         self.traverse(self.parser.AST)
         new_class = self.classes.get((scope, name))
         if not new_class:
@@ -244,5 +252,5 @@ class StaticAnalyzer(object):
             if class_.base_class == base_class:
                 return
         self.change_class_name(
-            scope, base_class.class_name, name)
+            scope, base_class.class_name, name, force=True)
         self.parser.AST.remove(base_class)
