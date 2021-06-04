@@ -363,6 +363,12 @@ class TestParser(unittest.TestCase):
         with self.assertRaises(ParserError):
             parser.parseProgram()
 
+    def test_Error_Definiton_no_block_after_func(self):
+        lexer = Lexer('void x() ', direct_input=True)
+        parser = Parser(lexer, tests=True)
+        with self.assertRaises(ParserError):
+            parser.parseProgram()
+
     def test_Error_Class_missing_semicolon(self):
         lexer = Lexer('class x{}', direct_input=True)
         parser = Parser(lexer, tests=True)

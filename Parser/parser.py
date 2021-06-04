@@ -80,7 +80,11 @@ class Parser:
             if self.__getNextToken().type == '(':
                 parameters = self.parseParameters()
                 functionBlock = self.parseStatementBlock()
-                return FunctionDefine(type, name, parameters, functionBlock)
+                if functionBlock:
+                    return FunctionDefine(type, name, parameters, functionBlock)
+                else:
+                    raise ParserError(
+                        'Incorrect function definition', self.__current_token)
             elif self.__current_token.type == ';':
                 if type == 'void':
                     raise ParserError(
