@@ -111,7 +111,7 @@ class Parser:
                 return self.parseFuncCall(name)
             if self.__current_token.type == '=':
                 return self.parseAssignStatement(name)
-            elif self.__current_token.type == '#ID' and len(name) == 1:
+            elif self.__current_token.type == '#ID' and len(name.split('.')) == 1:
                 return self.parseDefinition(name)
             else:
                 return VariableAccess(name)
@@ -267,7 +267,7 @@ class Parser:
         for try_parse in [self.parseNumber,
                           self.parseParenthesesExpression,
                           self.parseVariableAccess, ]:
-            if value := try_parse():
+            if (value := try_parse()) != None:
                 break
 
         if negation:
