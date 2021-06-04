@@ -62,8 +62,9 @@ class FunctionDefine(ParserType):
         if len(self.parameters) > 0:
             text = text[:-2]
         text += ')'
-        if len(self.functionBlock.statements) > 0:
-            text += self.functionBlock.to_text(indent)
+        # if len(self.functionBlock.statements) > 0:
+        text += self.functionBlock.to_text(indent)
+
         return text
 
 
@@ -153,7 +154,10 @@ class ReturnStatement(ParserType):
         return ret
 
     def to_text(self, indent=0):
-        text = '\t'*indent+f'return {self.returnValue.to_text()};\n'
+        text = '\t'*indent+f'return'
+        if self.returnValue:
+            text += f' {self.returnValue.to_text()}'
+        text += ';\n'
         return text
 
 
