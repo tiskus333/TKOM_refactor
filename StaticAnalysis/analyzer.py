@@ -1,7 +1,7 @@
 
 
 from os import name
-from errors import AnalyzerError, ExecutionError
+from errors import AnalyzerError, ExecutionError, FunctionError
 from Parser.types import *
 
 
@@ -35,6 +35,7 @@ class StaticAnalyzer(object):
                         self.check_not_exists_add(scope_, node)
                         self.traverse(node.get_children(),
                                       scope_ + '.' + node.name)
+                        self.check_return(scope, node)
                     elif isinstance(node, ParameterDefine):
                         self.check_not_exists_add(scope_, node)
                     elif isinstance(node, VariableDefine):
@@ -57,12 +58,12 @@ class StaticAnalyzer(object):
 
     def check_exists(self, scope, node):
         if isinstance(node, VariableAccess):
-            if self.check_exists_nested(scope, node.name):
+            if self.check_exists_nested(scope, node.name, self.variables_def, func=False):
                 return
             else:
                 raise AnalyzerError('Variable', node.name)
         if isinstance(node, FuncCall):
-            if self.check_exists_nested(scope, node.function_name):
+            if self.check_exists_nested(scope, node.function_name, self.functions_def):
                 return
             else:
                 raise AnalyzerError('Function', node.function_name)
@@ -75,6 +76,7 @@ class StaticAnalyzer(object):
         if isinstance(node, FunctionDefine):
             if (scope, node.name) in self.functions_def:
                 raise AnalyzerError('Function', node.name, defined=True)
+
             self.functions_def[(scope, node.name)] = node
         if isinstance(node, ParameterDefine):
             if (scope, node.name) in self.variables_def:
@@ -83,6 +85,8 @@ class StaticAnalyzer(object):
         if isinstance(node, VariableDefine):
             if (scope, node.name) in self.variables_def:
                 raise AnalyzerError('Variable', node.name, defined=True)
+            # if not self.check_exists_nested(scope, node.type):
+            #     raise AnalyzerError('Class', node.type)
             self.variables_def[(scope, node.name)] = node
         pass
 
@@ -97,11 +101,14 @@ class StaticAnalyzer(object):
                 return list.get((scope_, name))
         return None
 
-    def check_exists_nested(self, scope, name):
+    def check_exists_nested(self, scope, name, list, func=True):
         name = name.split('.')
         next_name = name[1:]
-        if (var := self.check_all_scopes(scope, name[0], self.variables_def)):
-            var_type = var.type
+        if next_name != []:
+            list = self.variables_def
+            func = False
+        if (var := self.check_all_scopes(scope, name[0], list)):
+            var_type = var.type if not func else var.return_type
             if var_type in ['int', 'float']:
                 return var
             return self.check_contains(var, next_name)
@@ -132,19 +139,19 @@ class StaticAnalyzer(object):
                         if isinstance(arg, FuncCall):
                             self.temp_funccall = arg
                             if (variable := self.check_exists_nested(
-                                    scope, arg.function_name)):
+                                    scope, arg.function_name, self.functions_def)):
                                 if variable.return_type != param.type:
-                                    raise AnalyzerError(
-                                        f'Wrong Function return type expected {param.type} got {arg.type}', param.type)
+                                    raise FunctionError(
+                                        f'Wrong Function return type expected {param.type} got {arg.type}')
                         if isinstance(arg, VariableAccess):
                             if (variable := self.check_exists_nested(
-                                    scope, arg.name)):
+                                    scope, arg.name, self.variables_def, func=False)):
                                 if variable.type != param.type:
-                                    raise AnalyzerError(
-                                        f'Wrong argument type expected {param.type} got {variable.type}', param.type)
+                                    raise FunctionError(
+                                        f'Wrong argument type expected {param.type} got {variable.type}')
                 else:
-                    raise AnalyzerError(
-                        f'Function {name} takes only {len(funcdef.parameters)} parameters, {len(funccall.arguments)} provided', name)
+                    raise FunctionError(
+                        f'Function {name} takes only {len(funcdef.parameters)} parameters, {len(funccall.arguments)} provided')
             return funcdef
         return None
 
@@ -166,6 +173,31 @@ class StaticAnalyzer(object):
         members += classDef.members
         return members
 
+    def check_return(self, scope, function):
+        found = 0
+        for statement in function.functionBlock.statements:
+            if isinstance(statement, ReturnStatement):
+                found = 1
+                if (y := statement.returnValue == None) != (x := function.return_type == 'void'):
+                    message = ('V' if x else 'Non v') + f'oid function {function.name} has ' + (
+                        '' if y else 'non ') + 'void return'
+                    raise FunctionError(message)
+                if isinstance(statement.returnValue, VariableAccess):
+                    if (variable := self.check_all_scopes(
+                            scope + f'.{function.name}', statement.returnValue.name, self.variables_def)):
+                        if variable.type != function.return_type:
+                            raise FunctionError(
+                                f'In function {function.name}: Expecting {function.return_type} as return type instead got {variable.type}')
+                if isinstance(statement.returnValue, FuncCall):
+                    if (variable := self.check_all_scopes(
+                            scope + f'.{function.name}', statement.returnValue.function_name, self.functions_def)):
+                        if variable.return_type != function.return_type:
+                            raise FunctionError(
+                                f'In function {function.name}: Expecting {function.return_type} as return type instead got {variable.type}')
+        if function.return_type != 'void' and not found:
+            raise FunctionError(
+                'Reached end of non void function without return')
+
     def print_members(self):
         print(self.__dict__)
 
@@ -173,6 +205,12 @@ class StaticAnalyzer(object):
         with open(file, 'w') as f:
             for node in self.parser.AST:
                 f.write(node.to_text())
+
+    def to_code(self):
+        ret = f''
+        for node in self.parser.AST:
+            ret += node.to_text()
+        return ret
 
     def change_class_name(self, scope, old_name, new_name):
         self.clear()
@@ -183,7 +221,7 @@ class StaticAnalyzer(object):
                 f'Class {old_name} does not exist in this scope {scope}')
         if self.check_all_scopes(scope, new_name, self.classes):
             raise ExecutionError(
-                f'Class named {new_name} already exists in this scope {scope}')
+                f'Class {new_name} already exists in this scope {scope}')
         for var_def in self.variables_def.values():
             if var_def.type == change_class.class_name:
                 var_def.type = new_name
