@@ -13,7 +13,7 @@ class B : Z
 		}
 		 else
 		{
-			B kupa;
+			B zmienna;
 			c = c + 1;
 		}
 	}
@@ -33,7 +33,7 @@ class A : Z
 		}
 		 else
 		{
-			B kupa;
+			B zmienna;
 			c = c + 1;
 		}
 	}

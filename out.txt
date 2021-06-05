@@ -13,7 +13,7 @@ class NowaNazwa : Z
 		}
 		 else
 		{
-			NowaNazwa kupa;
+			NowaNazwa zmienna;
 			c = c + 1;
 		}
 	}
@@ -30,7 +30,7 @@ class A : Z
 		}
 		 else
 		{
-			NowaNazwa kupa;
+			NowaNazwa zmienna;
 			c = c + 1;
 		}
 	}

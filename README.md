@@ -4,10 +4,146 @@ Projekt na przedmiot TKOM 21L. Refaktoryzacja kodu.
 # Pobranie wymaganych pakietow
 pip3 install coverage
 # Uruchomienie programu
-python main.py
-# Uruchomienie testow
-coverage run -m  unittest discover -v; coverage xml; coverage report -m
+python3 main.py -i in.txt -o out.txt -r DoZmiany PoZmianie
+python3 main.py -i in.txt -o out.txt -m KlasaPochodna
 
+Więcej opcji:
+
+python3 main.py -h
+# Uruchomienie testow
+```
+coverage run -m  unittest discover -v; coverage xml; coverage report -m
+```
+# Przykładowe działanie programu 
+```
+python3 main.py -m NowaNazwa -r C NowaNazwa -i my_code.txt -o out.txt
+```
+### **Przed**
+```C++
+class Z
+{
+};
+class B : Z
+{
+	int c;
+	int funB;
+	void funB()
+	{
+		if(c > 2)
+		{
+			c = 2;
+		}
+		 else
+		{
+			B zmienna;
+			c = c + 1;
+		}
+	}
+};
+class C : B
+{
+};
+class A : Z
+{
+	int c;
+	int funB;
+	void funB()
+	{
+		if(c > 2)
+		{
+			c = 2;
+		}
+		 else
+		{
+			B zmienna;
+			c = c + 1;
+		}
+	}
+	int a;
+	B b;
+	int fun(int x, int y)
+	{
+		y = y + a;
+		return x + y;
+	}
+	B fun2(B b1, B b2)
+	{
+		return b1.funB + b2.funB;
+	}
+};
+A ob;
+void main()
+{
+	ob.a = 2;
+	float y;
+	ob.fun(1, ob.fun(1, 2));
+	ob.b.c = 1;
+	ob.b.funB = 2;
+	ob.funB();
+}
+```
+### **Po**
+```C++
+class Z
+{
+};
+class NowaNazwa : Z
+{
+	int c;
+	int funB;
+	void funB()
+	{
+		if(c > 2)
+		{
+			c = 2;
+		}
+		 else
+		{
+			NowaNazwa zmienna;
+			c = c + 1;
+		}
+	}
+};
+class A : Z
+{
+	int c;
+	int funB;
+	void funB()
+	{
+		if(c > 2)
+		{
+			c = 2;
+		}
+		 else
+		{
+			NowaNazwa zmienna;
+			c = c + 1;
+		}
+	}
+	int a;
+	NowaNazwa b;
+	int fun(int x, int y)
+	{
+		y = y + a;
+		return x + y;
+	}
+	NowaNazwa fun2(NowaNazwa b1, NowaNazwa b2)
+	{
+		return b1.funB + b2.funB;
+	}
+};
+A ob;
+void main()
+{
+	ob.a = 2;
+	float y;
+	ob.fun(1, ob.fun(1, 2));
+	ob.b.c = 1;
+	ob.b.funB = 2;
+	ob.funB();
+}
+
+```
 # Przykładowe wypisanie drzewa
 ```[
 Class definition: Name=kot; BaseClass=pies; 
@@ -29,12 +165,12 @@ Class definition: Name=kot; BaseClass=pies;
                 StatementBlock:[
                     While statement:
                         RelationCondition: operator <,
-                            VariableAccess: Name=['x', 'a', 'b'],
+                            VariableAccess: Name=['x.a.b'],
                             Negation:
                                 FunctionCall: FunctionName=['condfun'], Arguments=[
                                     FunctionCall: FunctionName=['innerfun'], Arguments=[]];
                       StatementBlock:[
-                          FunctionCall: FunctionName=['x', 'func'], Arguments=[
+                          FunctionCall: FunctionName=['x.func'], Arguments=[
                               VariableAccess: Name=['c'],
                               VariableAccess: Name=['d']],
                           AssignStatement: Assignee=['a'];
