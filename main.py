@@ -10,14 +10,14 @@ if __name__ == '__main__':
     parser = ArgumentParser(description=description)
     parser.add_argument('-r', '--rename', action='append', dest='rename_list',
                         type=str, nargs='*',
-                        help="Examples: -r scope old_name new_name")
+                        help="Examples: -r old_name new_name")
     parser.add_argument('-m', '--merge', action='append', dest='merge_list',
                         type=str, nargs='*',
-                        help="Examples: -m scope class_name")
+                        help="Examples: -m class_name")
     parser.add_argument('-o', '--output_file', action='store',
                         default='out.txt', help='File to store the output')
     parser.add_argument('-i', '--input_file', action='store',
-                        help='File to read from', default='my_code.txt')
+                        help='File to read from', required=True)
     opts = parser.parse_args()
 
     print("List of items: {}".format(opts))
@@ -26,8 +26,14 @@ if __name__ == '__main__':
     analyzer = StaticAnalyzer(parser)
     if opts.rename_list:
         for rename in opts.rename_list:
-            analyzer.change_class_name(rename[0], rename[1], rename[2])
+            assert(len(rename) == 2)
+            analyzer.change_class_name(rename[0], rename[1])
     if opts.merge_list:
         for merge in opts.merge_list:
-            analyzer.merge_classes(merge[0], merge[1])
+            assert(len(merge) == 1)
+            analyzer.merge_classes(merge[0])
+
+    if not opts.merge_list and not opts.rename_list:
+        analyzer.format()
+
     analyzer.save_file(file=opts.output_file)
