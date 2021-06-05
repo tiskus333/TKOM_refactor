@@ -1,15 +1,29 @@
 # TKOM_2021
 Projekt na przedmiot TKOM 21L. Refaktoryzacja kodu.
 
+Program czyta plik wejściowy z kodem opartym na C, ale z klasami. ([dokładna gramatyka](gramatyka.ebnf))
+
+Umożliwia zmianę nazwy klasy oraz wszystkich zmiennych i zwracanych typów, oraz łączenie klasy pochodnej i bazowej w jedną. ([dokładny opis](dokumentacja_koncowa.pdf))
+
 # Pobranie wymaganych pakietow
+Potrzebne wyłącznie do badania pokrycia kodu testami
+```
 pip3 install coverage
+```
 # Uruchomienie programu
+Zmiana nazwy
+```
 python3 main.py -i in.txt -o out.txt -r DoZmiany PoZmianie
+```
+Złączenie klas
+```
 python3 main.py -i in.txt -o out.txt -m KlasaPochodna
+```
 
-Więcej opcji:
-
+Więcej informacji o uruchomieniu:
+```
 python3 main.py -h
+```
 # Uruchomienie testow
 ```
 coverage run -m  unittest discover -v; coverage xml; coverage report -m
