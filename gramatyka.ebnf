@@ -1,4 +1,4 @@
-program = { classDef | funcDef };
+program = { classDef | funcDef | defineStatement};
 classDef = "class", id, [ ":", id], "{", { defineStatement }, { funcDef }, "};";
 funcDef = ("void" | type), id, "(", parameters, ")", statementBlock;
 parameters = [ type, id, { ",", type, id }];
@@ -6,8 +6,8 @@ arguments =  [ expression { ",", expression }];
 statementBlock = "{", {ifStatement | whileStatement | returnStatement | defineStatement | assignStatement| statementBlock | (funcCall,";") } ,"}";
 ifStatement = "if", "(", condition, ")", statementBlock, [ "else", statementBlock ];
 whileStatement = "while", "(", condition, ")", statementBlock;
-returnStatement = "return", expression , ";";
-defineStatement = type, id [ assignmentOp​, expression ],";";
+returnStatement = "return", [expression] , ";";
+defineStatement = type, id,";";
 assignStatement = { id, "." }, id, assignmentOp​, expression ";";
 expression = baseExpr, { additiveOp , expression } ;
 baseExpr = [arithmeticNegationOp ], (( { id, "." }, id ) | number | parenthesesExpr | funcCall);
