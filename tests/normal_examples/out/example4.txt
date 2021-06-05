@@ -1,0 +1,23 @@
+class Z
+{
+	int z;
+};
+class A : Z
+{
+	int a;
+};
+class B : Z
+{
+	int a;
+	int b;
+};
+class C : A
+{
+	int c;
+};
+void main()
+{
+	B b;
+	b.a = 2;
+	b.z = 3;
+}

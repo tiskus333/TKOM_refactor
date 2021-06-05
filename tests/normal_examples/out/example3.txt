@@ -1,0 +1,31 @@
+class B
+{
+	int fun(int x)
+	{
+		int l;
+		l = 0;
+		while(x < 3)
+		{
+			l = l + 1;
+			if(l != 2)
+			{
+				l = 1;
+			}
+			 else
+			{
+				x = 0;
+			}
+		}
+		return x;
+	}
+	B fun2(B z1, B z2)
+	{
+		return z1 + z2;
+	}
+};
+void main()
+{
+	B b;
+	b.fun(1);
+	return;
+}
