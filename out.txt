@@ -1,0 +1,58 @@
+class Z
+{
+};
+class NowaNazwa : Z
+{
+	int c;
+	int funB;
+	void funB()
+	{
+		if(c > 2)
+		{
+			c = 2;
+		}
+		 else
+		{
+			NowaNazwa kupa;
+			c = c + 1;
+		}
+	}
+};
+class A : Z
+{
+	int c;
+	int funB;
+	void funB()
+	{
+		if(c > 2)
+		{
+			c = 2;
+		}
+		 else
+		{
+			NowaNazwa kupa;
+			c = c + 1;
+		}
+	}
+	int a;
+	NowaNazwa b;
+	int fun(int x, int y)
+	{
+		y = y + a;
+		return x + y;
+	}
+	NowaNazwa fun2(NowaNazwa b1, NowaNazwa b2)
+	{
+		return b1.funB + b2.funB;
+	}
+};
+A ob;
+void main()
+{
+	ob.a = 2;
+	float y;
+	ob.fun(1, ob.fun(1, 2));
+	ob.b.c = 1;
+	ob.b.funB = 2;
+	ob.funB();
+}
