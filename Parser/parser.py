@@ -9,6 +9,7 @@ class Parser:
     def __init__(self, lexer: Lexer, tests=False) -> None:
         assert(lexer is not None)
         self.__lexer = lexer
+        self.reservedTokens = lexer.TokenList
         self.__current_token: Optional[Token] = None
         self.AST = []
         self.__getNextToken()

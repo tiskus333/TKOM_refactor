@@ -20,22 +20,23 @@ class StaticAnalyzer(object):
         self.temp_scope = None
 
     def traverse(self, AST, scope='GLOBAL'):
+        scope_ = scope
         for node_ in AST:
             if not isinstance(node_, list):
                 node_ = [node_]
-            scope_ = scope
             for node in node_:
                 if isinstance(node, ParserType):
                     if isinstance(node, ClassDefine):
-                        self.check_not_exists_add(scope, node)
-                        self.check_base_class(scope, node)
+                        self.check_not_exists_add(scope_, node)
+                        self.check_base_class(
+                            scope_ + '.' + node.class_name, node)
                         self.traverse(node.get_children(),
                                       scope_ + '.' + node.class_name)
                     elif isinstance(node, FunctionDefine):
                         self.check_not_exists_add(scope_, node)
                         self.traverse(node.get_children(),
                                       scope_ + '.' + node.name)
-                        self.check_return(scope, node)
+                        self.check_return(scope_, node)
                     elif isinstance(node, ParameterDefine):
                         self.check_not_exists_add(scope_, node)
                     elif isinstance(node, VariableDefine):
@@ -148,7 +149,7 @@ class StaticAnalyzer(object):
                                     scope, arg.function_name, self.functions_def)):
                                 if variable.return_type != param.type:
                                     raise FunctionError(
-                                        f'Wrong Function return type expected {param.type} got {arg.type}')
+                                        f'Wrong Function return type expected {param.type} got {variable.return_type}')
                         if isinstance(arg, VariableAccess):
                             if (variable := self.check_exists_nested(
                                     scope, arg.name, self.variables_def, func=False)):
@@ -206,10 +207,7 @@ class StaticAnalyzer(object):
                             scope + f'.{function.name}', statement.returnValue.function_name, self.functions_def)):
                         if variable.return_type != function.return_type:
                             raise FunctionError(
-                                f'In function {function.name}: Expecting {function.return_type} as return type instead got {variable.type}')
-        # if function.return_type != 'void' and not found:
-        #     raise FunctionError(
-        #         'Reached end of non void function without return')
+                                f'In function {function.name}: Expecting {function.return_type} as return type instead got {variable.return_type}')
 
     def print_members(self):
         print(self.__dict__)
@@ -225,16 +223,18 @@ class StaticAnalyzer(object):
             ret += node.to_text()
         return ret
 
-    def change_class_name(self, scope, old_name, new_name, force=False):
+    def change_class_name(self, old_name, new_name, scope='GLOBAL', force=False):
+        if new_name in self.parser.reservedTokens:
+            raise ExecutionError('Cannot rename to reseved name')
         self.clear()
         self.traverse(self.parser.AST)
         change_class = self.classes.get((scope, old_name))
         if not change_class:
             raise ExecutionError(
-                f'Class {old_name} does not exist in this scope {scope}')
+                f'Class {old_name} does not exist')
         if self.check_all_scopes(scope, new_name, self.classes) and not force:
             raise ExecutionError(
-                f'Class {new_name} already exists in this scope {scope}')
+                f'Class {new_name} already exists')
         for var_def in self.variables_def.values():
             if var_def.type == change_class.class_name:
                 var_def.type = new_name
@@ -243,19 +243,25 @@ class StaticAnalyzer(object):
                 func_def.return_type = new_name
         change_class.class_name = new_name
 
-    def merge_classes(self, scope, name):
+    def merge_classes(self, name, scope='GLOBAL'):
         self.clear()
         self.traverse(self.parser.AST)
         new_class = self.classes.get((scope, name))
         if not new_class:
             raise ExecutionError(
-                f'Class {name} does not exist in this scope {scope}')
+                f'Class {name} does not exist')
         base_class = new_class.base_class
+        if not base_class:
+            raise ExecutionError(
+                f'Class {name} does not inherit form other class')
         new_class.members = base_class.members + new_class.members
         new_class.base_class = base_class.base_class if base_class.base_class else None
         for class_ in self.classes.values():
             if class_.base_class == base_class:
                 return
         self.change_class_name(
-            scope, base_class.class_name, name, force=True)
+            base_class.class_name, name, scope, force=True)
         self.parser.AST.remove(base_class)
+
+    def format(self):
+        self.traverse(self.parser.AST, 'GLOBAL')
