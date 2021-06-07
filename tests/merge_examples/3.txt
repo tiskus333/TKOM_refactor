@@ -1,0 +1,13 @@
+class B
+{
+	int b;
+};
+class A
+{
+	int b;
+	int a;
+};
+class C : B
+{
+	int c;
+};

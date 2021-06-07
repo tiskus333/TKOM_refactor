@@ -1,0 +1,10 @@
+class B
+{
+	B fun(B a1, B a2)
+	{
+		return a1;
+	}
+};
+class C : B
+{
+};

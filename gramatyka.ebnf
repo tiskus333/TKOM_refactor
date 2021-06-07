@@ -1,0 +1,30 @@
+program = { classDef | funcDef | defineStatement};
+classDef = "class", id, [ ":", id], "{", { defineStatement }, { funcDef }, "};";
+funcDef = ("void" | type), id, "(", parameters, ")", statementBlock;
+parameters = [ type, id, { ",", type, id }];
+arguments =  [ expression { ",", expression }];
+statementBlock = "{", {ifStatement | whileStatement | returnStatement | defineStatement | assignStatement| statementBlock | (funcCall,";") } ,"}";
+ifStatement = "if", "(", condition, ")", statementBlock, [ "else", statementBlock ];
+whileStatement = "while", "(", condition, ")", statementBlock;
+returnStatement = "return", [expression] , ";";
+defineStatement = type, id,";";
+assignStatement = { id, "." }, id, assignmentOp​, expression ";";
+expression = baseExpr, { additiveOp , expression } ;
+baseExpr = [arithmeticNegationOp ], (( { id, "." }, id ) | number | parenthesesExpr | funcCall);
+parenthesesExpr = "(", expression, ")";
+condition = baseCond, { relationOp, baseCond};
+baseCond = ( [ logicNegationOp ], parenthesesCond )| expression;
+parenthesesCond = "(", condition, ")";
+arithmeticNegationOp = "-";
+logicNegationOp = "!";
+assignmentOp​ = "=" ;
+relationOp = "<" | ">" | "<=" | ">=" | "==" | "!=" ;
+additiveOp = "+"| "-";
+funcCall = { id, "." }, id, "(", arguments, ")";
+type = "int" | "float" | id;
+number = digit, { digit }, [ ".", { digit } ];
+id = letter { digit | letter };
+digit = '0' |'1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9';
+letter = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' | 'M' | 'N' | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z' |
+         'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm' | 'n' | 'o' | 'p' | 'q' | 'r' | 's' | 't' | 'u' | 'v' | 'w' | 'x' | 'y' | 'z' |
+         '_' | '$';

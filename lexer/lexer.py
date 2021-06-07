@@ -6,8 +6,11 @@ import errors
 
 class Lexer:
     def __init__(self, path_name: str, direct_input=False) -> None:
-        self.reservedTokensDict = {'main': 0, 'class': 1, 'if': 2, 'else': 3, 'void': 4, 'float': 5, 'int': 6, 'while': 7, 'return': 8, '(': 9, ')': 10,
-                                   '{': 11, '}': 12, ':': 13, ';': 14, ',': 15, '.': 16,   '=': 17, '!': 18, '!=': 19, '==': 20, '<=': 21, '<': 22, '>': 23,  '>=': 24, '+': 25, '-': 26, '#ID': 27, '#EOF': 28}
+        self.reservedTokensDict = {'main': 0, 'class': 1, 'if': 2, 'else': 3, 'void': 4, 'float': 5, 'int': 6, 'return': 7, 'while': 8,  '(': 9, ')': 10,
+                                   '{': 11, '}': 12, ':': 13, ';': 14, ',': 15, '.': 16,   '!': 17, '=': 18,  '+': 19, '-': 20, '<': 21, '>': 22, '==': 23, '!=': 24, '<=': 25, '>=': 26,  '#ID': 27,  "#INT_VAL": 28, "#FLOAT_VAL": 29, '#COM': 30, '#EOF': 31}
+        self.TokenList = self.reservedTokensDict.keys()
+        self.allowedafternumber = [
+            ';', ',', '+', '-', '<', '>', '!', '<=', '>=', '==', '!=', '(', ')', '{', '}', '=', '.']
         self.filehandler = FileHandler(path_name, direct_input)
         self.__getNextChar()
 
@@ -22,12 +25,13 @@ class Lexer:
 
     def buildToken(self, verbose=False) -> Token:
 
-        while self.__getCurrChar().isspace() or self.__skipComment():
+        while self.__getCurrChar().isspace():
             self.__getNextChar()
 
         position = self.__getFilePosition()
 
         for try_to_build_token in [
+                self.__buildComment,
                 self.__buildNumber,
                 self.__buildID,
                 self.__buildDoubleCharTokens,
@@ -44,15 +48,16 @@ class Lexer:
             raise errors.LexerError(
                 f"Unkown Token {ord(self.__getCurrChar()),self.__getCurrChar()}", file_handler=self.filehandler)
         else:
-            return Token(self.reservedTokensDict['#EOF'], '#EOF', position)
+            return Token(type='#EOF', value='#EOF', position=position)
 
-    # Skip every character untill new line
-    def __skipComment(self):
+    # Try to build comment
+    def __buildComment(self):
         if self.__getCurrChar() == '#':
-            while self.__getNextChar() != '\n':
-                pass
-            return True
-        return False
+            comment = ['#']
+            while self.__getNextChar() != '\n' and self.__getCurrChar():
+                comment.append(self.__getCurrChar())
+            comment = ''.join(comment)
+            return Token(type='#COM', value=comment)
 
     # Try tu build int or float number
     def __buildNumber(self):
@@ -67,6 +72,8 @@ class Lexer:
             collected_chars.append(self.__getCurrChar())
             self.__getNextChar()
 
+        if not (self.__getCurrChar().isspace() or self.__getCurrChar() in self.allowedafternumber):
+            raise errors.LexerError('Invalid token', self.filehandler)
         # Dot indicates float number
         if self.__getCurrChar() == '.':
             collected_chars.append('.')
@@ -77,19 +84,18 @@ class Lexer:
             while self.__getCurrChar().isdecimal():
                 collected_chars.append(self.__getCurrChar())
                 self.__getNextChar()
-
+            if not (self.__getCurrChar().isspace() or self.__getCurrChar() in self.allowedafternumber):
+                raise errors.LexerError('Invalid token', self.filehandler)
             result = ''.join(collected_chars)
             return Token(
-                type=self.reservedTokensDict["float"],
-                value=float(result),
-                position=(0, 0)
+                type="#FLOAT_VAL",
+                value=float(result)
             )
         else:
             result = ''.join(collected_chars)
             return Token(
-                type=self.reservedTokensDict["int"],
-                value=int(result),
-                position=(0, 0)
+                type="#INT_VAL",
+                value=int(result)
             )
 
     # Try to build identificator or keyword
@@ -107,13 +113,11 @@ class Lexer:
         result = ''.join(collected_chars)
 
         # Check if found word is a keyword, otherwise it is a new idenetificator
-        if not (token_type := self.reservedTokensDict.get(result)):
-            token_type = self.reservedTokensDict["#ID"]
+        token_type = result if result in self.TokenList else '#ID'
 
         return Token(
             type=token_type,
-            value=result,
-            position=(0, 0)
+            value=result
         )
 
     def __buildDoubleCharTokens(self):
@@ -123,27 +127,24 @@ class Lexer:
                 result = ''.join([char, char2])
                 self.__getNextChar()
                 return Token(
-                    type=self.reservedTokensDict[result],
-                    value=result,
-                    position=(0, 0)
+                    type=result,
+                    value=result
                 )
             else:
                 return Token(
-                    type=self.reservedTokensDict[char],
-                    value=char,
-                    position=(0, 0)
+                    type=char,
+                    value=char
                 )
         else:
             return None
 
     def __buildSingleCharToken(self):
         char = self.__getCurrChar()
-        if char in self.reservedTokensDict:
+        if char in self.TokenList:
             self.__getNextChar()
             return Token(
-                type=self.reservedTokensDict[char],
-                value=char,
-                position=(0, 0)
+                type=char,
+                value=char
             )
         else:
             return None

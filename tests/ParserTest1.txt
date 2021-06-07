@@ -1,0 +1,30 @@
+class A: B 
+{ 
+    int fun(int c, float d)
+    {
+        if(!(2>4))
+        {
+            a=1;
+        }
+        else
+        {
+            while(x.ab < -condfun(innerfun()))
+            {
+                x.func(c,d);
+                a = (2-x);
+            }
+        }
+    }
+    float x;
+    void fun2()
+    { 
+        return 2+3-x;
+    } 
+};
+void main()
+{
+    A a;
+    int x;
+    a.fun(x,2.0);
+    return 2-3;
+}

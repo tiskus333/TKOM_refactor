@@ -5,9 +5,14 @@ from errors import LexerError
 
 class TestLexer(unittest.TestCase):
     def test_CheckKeywords(self):
-        lexer = Lexer("Tests/lexerTest/alltokens.txt")
-        ExpectedTokenList = ["main", "class", "if", "else", "void", "float", "int", "return",  "while",
-                             '(', ')', '{', '}', ':', ';', '.', '!', '=', '+', '-', '<', '>', '==', '!=', '<=', '>=', 0, 1, 10, 12, 1234567890, 2, float(0.12), float(1.234), float(5.6667), float(0.001), "_test1", "test_2", "$test3", "_test_4_"]
+        lexer = Lexer("Tests/alltokens.txt")
+        ExpectedTokenList = ["# Keywords", "main", "class", "if", "else", "void", "float", "int", "return",  "while",
+                             "# single-character tokens", '(', ')', '{', '}', ':', ';', ',', '.', '!', '=', '+', '-', '<', '>',
+                             "# double-character tokens", '==', '!=', '<=', '>=',
+                             "# int numbers", 0, 1, 10, 12, 1234567890, 2,
+                             "# float numbers", float(0.12), float(
+                                 1.234), float(5.6667), float(0.001),
+                             "# identificators", "_test1", "test_2", "$test3", "_test_4_"]
         for i in range(len(ExpectedTokenList)):
             self.assertEqual(lexer.buildToken().value, ExpectedTokenList[i])
 
@@ -17,7 +22,7 @@ class TestLexer(unittest.TestCase):
         for i in range(len(expectedTokens)):
             self.assertEqual((t := lexer.buildToken()).value,
                              expectedTokens[i])
-            self.assertEqual(t.type, lexer.reservedTokensDict['#ID'])
+            self.assertEqual(t.type, '#ID')
 
     def test_UnknownToken(self):
         unexpectedTokens = ['^', '*', '%', '/', '?',
@@ -39,9 +44,13 @@ class TestLexer(unittest.TestCase):
 
     def test_SplitNumberID(self):
         lexer = Lexer("12t_2", direct_input=True)
-        expectedTokens = [12, "t_2"]
-        for i in range(len(expectedTokens)):
-            self.assertEqual(lexer.buildToken().value, expectedTokens[i])
+        with self.assertRaises(LexerError):
+            lexer.buildToken()
+
+    def test_SplitNumberID_float(self):
+        lexer = Lexer("12.1t_2", direct_input=True)
+        with self.assertRaises(LexerError):
+            lexer.buildToken()
 
     def test_TabInsteadSpace(self):
         lexer = Lexer("cos\tam", direct_input=True)
@@ -51,7 +60,7 @@ class TestLexer(unittest.TestCase):
 
     def test_Comment(self):
         lexer = Lexer("token#test komentarza", direct_input=True)
-        expectedTokens = ["token"]
+        expectedTokens = ["token", "#test komentarza"]
         for i in range(len(expectedTokens)):
             self.assertEqual(lexer.buildToken().value, expectedTokens[i])
 
@@ -77,13 +86,18 @@ class TestLexer(unittest.TestCase):
                              expecetedPositions[i])
 
     def test_EmptyFile(self):
-        lexer = Lexer("Tests/lexerTest/empty.txt")
-        self.assertEqual(lexer.buildToken().type,
-                         lexer.reservedTokensDict['#EOF'])
+        lexer = Lexer("Tests/empty.txt")
+        self.assertEqual(lexer.buildToken().type, '#EOF')
+
+    def test_ErrorInFile(self):
+        lexer = Lexer("Tests/errorfile.txt")
+        with self.assertRaises(LexerError):
+            while lexer.buildToken().value != '#EOF':
+                pass
 
     def test_NoFile(self):
         with self.assertRaises(IOError):
-            lexer = Lexer("Tests/lexerTest/no_such_file.txt")
+            lexer = Lexer("Tests/no_such_file.txt")
 
     def test_PrintToken(self):
         lexer = Lexer("token", direct_input=True)

@@ -1,9 +1,8 @@
-# All tokens 
 # Keywords
 main class if else void float int return while
 
 # single-character tokens
-( ) { } : ; . ! = + - < >
+( ) { } : ; , . ! = + - < >
 
 # double-character tokens
 == != <= >=

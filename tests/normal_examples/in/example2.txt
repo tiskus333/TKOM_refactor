@@ -1,0 +1,29 @@
+class Bazowa
+{
+    int pole1;
+    float pole2;
+    int odejmij(int liczba)
+    {
+        pole1 = pole1 - liczba;
+        return pole1;
+    }
+
+};
+
+class Pochodna : Bazowa
+{
+    float pole3;
+    void przeciazane()
+    {
+        pole1 = 2;
+    }
+    float dodaj(float liczba)
+    {
+        pole3 = pole3 + liczba;
+        return pole3;
+    }
+};
+void main()
+{
+    Bazowa zmienna;
+}
